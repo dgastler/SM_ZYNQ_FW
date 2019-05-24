@@ -4,10 +4,10 @@ create_bd_design -dir ../bd "zynq_bd"
 #================================================================================
 #  List the AXI devices to be added (needed for AXI interconnect sizing)
 #================================================================================
-source ../bd/build_AXI_slaves.tcl
+#source ../bd/build_AXI_slaves.tcl
 
-puts "Adding list of AXI slaves"
-ADD_AXI_SLAVES
+#puts "Adding list of AXI slaves"
+#ADD_AXI_SLAVES
 
 #================================================================================
 #  Create and configure the basic zynq processing system.
@@ -19,16 +19,16 @@ source ../bd/build_CPU.tcl
 #================================================================================
 #  Create an AXI interconnect
 #================================================================================
-puts "Building AXI interconnect"
-source ../bd/build_AXI_interconnect.tcl
+#puts "Building AXI interconnect"
+#source ../bd/build_AXI_interconnect.tcl
 
 
 #================================================================================
 #  Configure and add AXI slaves
 #================================================================================
-puts $AXI_MASTER_CLK
-puts $AXI_MASTER_RST
-CONFIGURE_AXI_SLAVES
+#puts $AXI_MASTER_CLK
+#puts $AXI_MASTER_RST
+#CONFIGURE_AXI_SLAVES
 
 
 ######========================================

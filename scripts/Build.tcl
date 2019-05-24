@@ -59,7 +59,7 @@ report_drc -file $outputDir/post_imp_drc.rpt
 write_verilog -force $outputDir/bft_impl_netlist.v
 write_xdc -no_fixed_only -force $outputDir/bft_impl.xdc
 #write_checkpoint -force $outputDir/post_route
-set pass [expr {[get_property SLACK [get_timing_paths]] >= 0}]
+#set pass [expr {[get_property SLACK [get_timing_paths]] >= 0}]
 write_checkpoint -force $outputDir/post_route
 
 

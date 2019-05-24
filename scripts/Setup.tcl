@@ -42,6 +42,14 @@ for {set j 0} {$j < [llength $bd_files ] } {incr j} {
     set filename "../[lindex $bd_files $j]"
     source $filename
     puts "Running $filename"
+    read_bd [get_files "../$bd_path/$bd_name/$bd_name.bd"]
+    open_bd_design [get_files "../$bd_path/$bd_name/$bd_name.bd"]
+    make_wrapper -files [get_files $bd_name.bd] -top -import -force
+    set bd_wrapper $bd_name
+    append bd_wrapper "_wrapper.vhd"
+    read_vhdl [get_files $bd_wrapper]
+    
+    
 }
 
 
