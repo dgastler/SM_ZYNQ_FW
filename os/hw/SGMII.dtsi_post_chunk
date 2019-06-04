@@ -1,0 +1,13 @@
+&gem1 {
+local-mac-address = [00 0a 35 00 00 01];
+phy-mode = "rgmii-id";
+status = "okay";
+xlnx,ptp-enet-clock = <0x69f6bcb>;
+phy-handle = <&phy1>;
+
+phy1: phy@1 {
+compatible = "Xilinx PCS/PMA PHY";
+device_type = "ethernet-phy";
+xlnx,phy-type = <4>;
+reg = <1>;
+};
