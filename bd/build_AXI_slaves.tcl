@@ -5,6 +5,9 @@ source ../bd/axi_slave_helpers.tcl
 
 proc ADD_AXI_SLAVES { } {
     #fp_leds
+    [AXI_DEVICE_ADD SI     axi_interconnect_0/M00_AXI axi_interconnect_0/M00_ACLK axi_interconnect_0/M00_ARESETN 50000000]    
+    [AXI_DEVICE_ADD SERV M01 PL_CLK PL_RESET_N 50000000]
+    
 #    [AXI_DEVICE_ADD XVC1    axi_interconnect_0/M00_AXI axi_interconnect_0/M00_ACLK axi_interconnect_0/M00_ARESETN 50000000]
 #    [AXI_DEVICE_ADD XVC2    axi_interconnect_0/M01_AXI axi_interconnect_0/M01_ACLK axi_interconnect_0/M01_ARESETN 50000000]
 #    [AXI_DEVICE_ADD C2C1    axi_interconnect_0/M02_AXI axi_interconnect_0/M02_ACLK axi_interconnect_0/M02_ARESETN 50000000]    
@@ -20,6 +23,25 @@ proc CONFIGURE_AXI_SLAVES { } {
     global AXI_MASTER_CLK
     global AXI_MASTER_RST
     global AXI_INTERCONNECT_NAME
+
+
+    create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.0 SI
+#    make_bd_intf_pins_external  [get_bd_intf_pins SI/IIC]
+
+    make_bd_pins_external  -name SI_scl_i [get_bd_pins SI/scl_i]
+    make_bd_pins_external  -name SI_sda_i [get_bd_pins SI/sda_i]
+    make_bd_pins_external  -name SI_sda_o [get_bd_pins SI/sda_o]
+    make_bd_pins_external  -name SI_scl_o [get_bd_pins SI/scl_o]
+    make_bd_pins_external  -name SI_scl_t [get_bd_pins SI/scl_t]
+    make_bd_pins_external  -name SI_sda_t [get_bd_pins SI/sda_t]
+    #connect to AXI, clk, and reset between slave and mastre
+    [AXI_DEV_CONNECT SI $AXI_BUS_M(SI) $AXI_BUS_CLK(SI) $AXI_BUS_RST(SI)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(SI)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(SI)]
+
+    #build the DTSI chunk for this device to be a UIO
+    [AXI_DEV_UIO_DTSI_POST_CHUNK SI]
+
     
 #    #========================================
 #    #  XVC1 (xilinx axi debug XVC)
@@ -122,12 +144,12 @@ proc CONFIGURE_AXI_SLAVES { } {
 ##    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(C2C2)]
 #
 #    
-#    #========================================
-#    #  Add non-xilinx AXI slave
-#    #========================================
-#    puts "Adding user slaves"
-#    #AXI_PL_CONNECT creates all the PL slaves in the list passed to it.
-#    [AXI_PL_CONNECT "C2C1_GT"]                                                                                                                                                        
-#
+    #========================================
+    #  Add non-xilinx AXI slave
+    #========================================
+    puts "Adding user slaves"
+    #AXI_PL_CONNECT creates all the PL slaves in the list passed to it.
+    [AXI_PL_CONNECT "SERV"]
+
     validate_bd_design
 }

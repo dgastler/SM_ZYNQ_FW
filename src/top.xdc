@@ -62,31 +62,57 @@ set_property IOSTANDARD LVCMOS33 [get_ports {FIXED_IO_mio[0]}]
 #set_property -dict {PACKAGE_PIN V19  IOSTANDARD LVCMOS33} [get_ports {XVC1_tms}]
 
 
+
+set_property -dict {PACKAGE_PIN AE21  IOSTANDARD LVCMOS33} [get_ports {LHC_CLK_CMS_LOS   }]
+set_property -dict {PACKAGE_PIN AB26  IOSTANDARD LVCMOS33} [get_ports {LHC_CLK_OSC_LOS   }]
+set_property -dict {PACKAGE_PIN AE20  IOSTANDARD LVCMOS33} [get_ports {LHC_SRC_SEL       }]
+set_property -dict {PACKAGE_PIN AD18  IOSTANDARD LVCMOS33} [get_ports {HQ_CLK_CMS_LOS    }]
+set_property -dict {PACKAGE_PIN AD19  IOSTANDARD LVCMOS33} [get_ports {HQ_CLK_OSC_LOS    }]
+set_property -dict {PACKAGE_PIN AC26  IOSTANDARD LVCMOS33} [get_ports {HQ_SRC_SEL        }]
+#set_property -dict {PACKAGE_PIN AF19  IOSTANDARD LVCMOS33} [get_ports {FP_LED_RST        }]
+#set_property -dict {PACKAGE_PIN AF20  IOSTANDARD LVCMOS33} [get_ports {FP_LED_CLK        }]
+set_property -dict {PACKAGE_PIN AF20  IOSTANDARD LVCMOS33} [get_ports {FP_LED_RST        }]
+set_property -dict {PACKAGE_PIN AF19  IOSTANDARD LVCMOS33} [get_ports {FP_LED_CLK        }]
+set_property -dict {PACKAGE_PIN AD25  IOSTANDARD LVCMOS33} [get_ports {FP_LED_SDA        }]
+set_property -dict {PACKAGE_PIN AB20  IOSTANDARD LVCMOS33} [get_ports {FP_switch         }]
+
+set_property -dict {PACKAGE_PIN AF18  IOSTANDARD LVCMOS33} [get_ports {ESM_LED_CLK       }]
+set_property -dict {PACKAGE_PIN AA24  IOSTANDARD LVCMOS33} [get_ports {ESM_LED_SDA       }]
+
+
 # -------------------------------------------------------------------------------------------------
 # bank 33
 # -------------------------------------------------------------------------------------------------
-#set_property PACKAGE_PIN L5 [get_ports CLK200_P]
-#set_property PACKAGE_PIN L4 [get_ports CLK200_N]
-#set_property IOSTANDARD LVDS [get_ports CLK200_N]
-#set_property IOSTANDARD LVDS [get_ports CLK200_P]
+set_property -dict {PACKAGE_PIN L4  IOSTANDARD LVDS}     [get_ports {onboard_CLK_N}]
+set_property -dict {PACKAGE_PIN L5  IOSTANDARD LVDS}     [get_ports {onboard_CLK_P}]
+create_clock -period 5.000 -name onboard_CLK_P -add [get_ports onboard_CLK_P]
 
 # -------------------------------------------------------------------------------------------------
 # bank 34
 # -------------------------------------------------------------------------------------------------
+set_property -dict {PACKAGE_PIN F9  IOSTANDARD LVCMOS18} [get_ports {TTC_SRC_SEL       }]
+
+set_property -dict {PACKAGE_PIN B7  IOSTANDARD LVCMOS18} [get_ports {SI_sda}]
+set_property -dict {PACKAGE_PIN A7  IOSTANDARD LVCMOS18} [get_ports {SI_scl}]
+set_property -dict {PACKAGE_PIN C9  IOSTANDARD LVCMOS18} [get_ports {SI_INT    }]
+set_property -dict {PACKAGE_PIN C3  IOSTANDARD LVCMOS18} [get_ports {SI_LOL    }]
+set_property -dict {PACKAGE_PIN C2  IOSTANDARD LVCMOS18} [get_ports {SI_LOS    }]
+set_property -dict {PACKAGE_PIN B9  IOSTANDARD LVCMOS18} [get_ports {SI_OUT_DIS}]
+set_property -dict {PACKAGE_PIN C4  IOSTANDARD LVCMOS18} [get_ports {SI_ENABLE }]
 
 
 # -------------------------------------------------------------------------------------------------
 # fast ethernet
 # -------------------------------------------------------------------------------------------------
-#set_property -dict {PACKAGE_PIN W6 }  [get_ports refclk_125Mhz_P]
-#set_property -dict {PACKAGE_PIN W5 }  [get_ports refclk_125Mhz_N]
+set_property -dict {PACKAGE_PIN W6 }  [get_ports refclk_125Mhz_P]
+set_property -dict {PACKAGE_PIN W5 }  [get_ports refclk_125Mhz_N]
 #set_property -dict {PACKAGE_PIN AA6}  [get_ports refclk_TCDS_P]
 #set_property -dict {PACKAGE_PIN AA5}  [get_ports refclk_TCDS_N]
 #				   
-#set_property -dict {PACKAGE_PIN AF8}  [get_ports sgmii_tx_P]
-#set_property -dict {PACKAGE_PIN AF7}  [get_ports sgmii_tx_N]
-#set_property -dict {PACKAGE_PIN AD8}  [get_ports sgmii_rx_P]
-#set_property -dict {PACKAGE_PIN AD7}  [get_ports sgmii_rx_N]
+set_property -dict {PACKAGE_PIN AF8}  [get_ports sgmii_tx_P]
+set_property -dict {PACKAGE_PIN AF7}  [get_ports sgmii_tx_N]
+set_property -dict {PACKAGE_PIN AD8}  [get_ports sgmii_rx_P]
+set_property -dict {PACKAGE_PIN AD7}  [get_ports sgmii_rx_N]
 #				   
 #set_property -dict {PACKAGE_PIN AF4}  [get_ports tts_P]
 #set_property -dict {PACKAGE_PIN AF3}  [get_ports tts_N]
