@@ -211,3 +211,4 @@ proc AXI_DEV_CONNECT {device_name axi_master axi_clk axi_rst} {
 
     endgroup
 }
+

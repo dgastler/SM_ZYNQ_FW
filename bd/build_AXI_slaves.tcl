@@ -4,13 +4,14 @@ source ../bd/axi_slave_helpers.tcl
 #================================================================================
 
 proc ADD_AXI_SLAVES { } {
-    #fp_leds
     [AXI_DEVICE_ADD SI     axi_interconnect_0/M00_AXI axi_interconnect_0/M00_ACLK axi_interconnect_0/M00_ARESETN 50000000]    
     [AXI_DEVICE_ADD SERV M01 PL_CLK PL_RESET_N 50000000]
     
-#    [AXI_DEVICE_ADD XVC1    axi_interconnect_0/M00_AXI axi_interconnect_0/M00_ACLK axi_interconnect_0/M00_ARESETN 50000000]
-#    [AXI_DEVICE_ADD XVC2    axi_interconnect_0/M01_AXI axi_interconnect_0/M01_ACLK axi_interconnect_0/M01_ARESETN 50000000]
-#    [AXI_DEVICE_ADD C2C1    axi_interconnect_0/M02_AXI axi_interconnect_0/M02_ACLK axi_interconnect_0/M02_ARESETN 50000000]    
+    [AXI_DEVICE_ADD XVC1    axi_interconnect_0/M02_AXI axi_interconnect_0/M02_ACLK axi_interconnect_0/M02_ARESETN 50000000]
+    [AXI_DEVICE_ADD XVC2    axi_interconnect_0/M03_AXI axi_interconnect_0/M03_ACLK axi_interconnect_0/M03_ARESETN 50000000]
+
+    [AXI_DEVICE_ADD SLAVE_I2C M04 PL_CLK PL_RESET_N 50000000]
+    #    [AXI_DEVICE_ADD C2C1    axi_interconnect_0/M02_AXI axi_interconnect_0/M02_ACLK axi_interconnect_0/M02_ARESETN 50000000]    
 ##    [AXI_DEVICE_ADD C2C2    axi_interconnect_0/M03_AXI axi_interconnect_0/M03_ACLK axi_interconnect_0/M03_ARESETN 50000000]
 #
 #    [AXI_DEVICE_ADD C2C1_GT M03 PL_CLK PL_RESET_N 50000000] 
@@ -25,70 +26,75 @@ proc CONFIGURE_AXI_SLAVES { } {
     global AXI_INTERCONNECT_NAME
 
 
-    create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.0 SI
-#    make_bd_intf_pins_external  [get_bd_intf_pins SI/IIC]
-
-    make_bd_pins_external  -name SI_scl_i [get_bd_pins SI/scl_i]
-    make_bd_pins_external  -name SI_sda_i [get_bd_pins SI/sda_i]
-    make_bd_pins_external  -name SI_sda_o [get_bd_pins SI/sda_o]
-    make_bd_pins_external  -name SI_scl_o [get_bd_pins SI/scl_o]
-    make_bd_pins_external  -name SI_scl_t [get_bd_pins SI/scl_t]
-    make_bd_pins_external  -name SI_sda_t [get_bd_pins SI/sda_t]
-    #connect to AXI, clk, and reset between slave and mastre
-    [AXI_DEV_CONNECT SI $AXI_BUS_M(SI) $AXI_BUS_CLK(SI) $AXI_BUS_RST(SI)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(SI)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(SI)]
-
-    #build the DTSI chunk for this device to be a UIO
-    [AXI_DEV_UIO_DTSI_POST_CHUNK SI]
-
+#####    create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.0 SI
+######    make_bd_intf_pins_external  [get_bd_intf_pins SI/IIC]
+#####
+#####    make_bd_pins_external  -name SI_scl_i [get_bd_pins SI/scl_i]
+#####    make_bd_pins_external  -name SI_sda_i [get_bd_pins SI/sda_i]
+#####    make_bd_pins_external  -name SI_sda_o [get_bd_pins SI/sda_o]
+#####    make_bd_pins_external  -name SI_scl_o [get_bd_pins SI/scl_o]
+#####    make_bd_pins_external  -name SI_scl_t [get_bd_pins SI/scl_t]
+#####    make_bd_pins_external  -name SI_sda_t [get_bd_pins SI/sda_t]
+#####    #connect to AXI, clk, and reset between slave and mastre
+#####    [AXI_DEV_CONNECT SI $AXI_BUS_M(SI) $AXI_BUS_CLK(SI) $AXI_BUS_RST(SI)]
+#####    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(SI)]
+#####    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(SI)]
+#####
+#####    #build the DTSI chunk for this device to be a UIO
+#####    [AXI_DEV_UIO_DTSI_POST_CHUNK SI]
+    #========================================
+    # Si5344 I2C master
+    #========================================
+    [AXI_IP_I2C SI]
     
-#    #========================================
-#    #  XVC1 (xilinx axi debug XVC)
-#    #========================================
-#    puts "Adding Xilinx XVC1"
-#    #Create a xilinx axi debug bridge
-#    create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 XVC1
-#    #configure the debug bridge to be 
-#    set_property CONFIG.C_DEBUG_MODE  {3} [get_bd_cells XVC1]
-#    set_property CONFIG.C_DESIGN_TYPE {0} [get_bd_cells XVC1]
-#
-#    #connect to AXI, clk, and reset between slave and mastre
-#    [AXI_DEV_CONNECT XVC1 $AXI_BUS_M(XVC1) $AXI_BUS_CLK(XVC1) $AXI_BUS_RST(XVC1)]
-#    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(XVC1)]
-#    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(XVC1)]
-#
-#    
-#    #generate ports for the JTAG signals
-#    make_bd_pins_external       [get_bd_cells XVC1]
-#    make_bd_intf_pins_external  [get_bd_cells XVC1]
-#    
-#    #build the DTSI chunk for this device to be a UIO
-#    [AXI_DEV_UIO_DTSI_POST_CHUNK XVC1]
-#
-#    #========================================
-#    #  XVC2 (xilinx axi debug XVC)
-#    #========================================
-#    puts "Adding Xilinx XVC2"
-#    #Create a xilinx axi debug bridge
-#    create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 XVC2
-#    #configure the debug bridge to be 
-#    set_property CONFIG.C_DEBUG_MODE  {3} [get_bd_cells XVC2]
-#    set_property CONFIG.C_DESIGN_TYPE {0} [get_bd_cells XVC2]
-#
-#    #connect to AXI, clk, and reset between slave and mastre
-#    [AXI_DEV_CONNECT XVC2 $AXI_BUS_M(XVC2) $AXI_BUS_CLK(XVC2) $AXI_BUS_RST(XVC2)]
-#    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(XVC2)]
-#    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(XVC2)]
-#
-#    
-#    #generate ports for the JTAG signals
-#    make_bd_pins_external       [get_bd_cells XVC2]
-#    make_bd_intf_pins_external  [get_bd_cells XVC2]
-#    
-#    #build the DTSI chunk for this device to be a UIO
-#    [AXI_DEV_UIO_DTSI_POST_CHUNK XVC2]
-#
+    #========================================
+    #  XVC1 (xilinx axi debug XVC)
+    #========================================
+    puts "Adding Xilinx XVC1"
+    [AXI_IP_XVC XVC1]
+#####    #Create a xilinx axi debug bridge
+#####    create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 XVC1
+#####    #configure the debug bridge to be 
+#####    set_property CONFIG.C_DEBUG_MODE  {3} [get_bd_cells XVC1]
+#####    set_property CONFIG.C_DESIGN_TYPE {0} [get_bd_cells XVC1]
+#####
+#####    #connect to AXI, clk, and reset between slave and mastre
+#####    [AXI_DEV_CONNECT XVC1 $AXI_BUS_M(XVC1) $AXI_BUS_CLK(XVC1) $AXI_BUS_RST(XVC1)]
+#####    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(XVC1)]
+#####    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(XVC1)]
+#####
+#####    
+#####    #generate ports for the JTAG signals
+#####    make_bd_pins_external       [get_bd_cells XVC1]
+#####    make_bd_intf_pins_external  [get_bd_cells XVC1]
+#####    
+#####    #build the DTSI chunk for this device to be a UIO
+#####    [AXI_DEV_UIO_DTSI_POST_CHUNK XVC1]
+#####
+    #========================================
+    #  XVC2 (xilinx axi debug XVC)
+    #========================================
+    puts "Adding Xilinx XVC2"
+    [AXI_IP_XVC XVC2]
+#####    #Create a xilinx axi debug bridge
+#####    create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 XVC2
+#####    #configure the debug bridge to be 
+#####    set_property CONFIG.C_DEBUG_MODE  {3} [get_bd_cells XVC2]
+#####    set_property CONFIG.C_DESIGN_TYPE {0} [get_bd_cells XVC2]
+#####
+#####    #connect to AXI, clk, and reset between slave and mastre
+#####    [AXI_DEV_CONNECT XVC2 $AXI_BUS_M(XVC2) $AXI_BUS_CLK(XVC2) $AXI_BUS_RST(XVC2)]
+#####    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(XVC2)]
+#####    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST(XVC2)]
+#####
+#####    
+#####    #generate ports for the JTAG signals
+#####    make_bd_pins_external       [get_bd_cells XVC2]
+#####    make_bd_intf_pins_external  [get_bd_cells XVC2]
+#####    
+#####    #build the DTSI chunk for this device to be a UIO
+#####    [AXI_DEV_UIO_DTSI_POST_CHUNK XVC2]
+
 #    #========================================
 #    #  AXI C2C 1
 #    #========================================
@@ -149,7 +155,64 @@ proc CONFIGURE_AXI_SLAVES { } {
     #========================================
     puts "Adding user slaves"
     #AXI_PL_CONNECT creates all the PL slaves in the list passed to it.
-    [AXI_PL_CONNECT "SERV"]
+    [AXI_PL_CONNECT "SERV SLAVE_I2C"]
 
     validate_bd_design
+}
+
+
+proc AXI_IP_I2C {device_name} {
+    global AXI_BUS_M
+    global AXI_BUS_RST
+    global AXI_BUS_CLK
+    global AXI_MASTER_CLK
+    global AXI_MASTER_RST
+
+    puts "hi"
+    
+    create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.0 $device_name
+
+    #create external pins
+    make_bd_pins_external  -name ${device_name}_scl_i [get_bd_pins $device_name/scl_i]
+    make_bd_pins_external  -name ${device_name}_sda_i [get_bd_pins $device_name/sda_i]
+    make_bd_pins_external  -name ${device_name}_sda_o [get_bd_pins $device_name/sda_o]
+    make_bd_pins_external  -name ${device_name}_scl_o [get_bd_pins $device_name/scl_o]
+    make_bd_pins_external  -name ${device_name}_scl_t [get_bd_pins $device_name/scl_t]
+    make_bd_pins_external  -name ${device_name}_sda_t [get_bd_pins $device_name/sda_t]
+    #connect to AXI, clk, and reset between slave and mastre
+    [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    puts "hi"
+    #build the DTSI chunk for this device to be a UIO
+    [AXI_DEV_UIO_DTSI_POST_CHUNK $device_name]
+    puts "hi"
+}
+
+proc AXI_IP_XVC {device_name} {
+    global AXI_BUS_M
+    global AXI_BUS_RST
+    global AXI_BUS_CLK
+    global AXI_MASTER_CLK
+    global AXI_MASTER_RST
+    puts "sup?"
+    #Create a xilinx axi debug bridge
+    create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 $device_name
+    #configure the debug bridge to be 
+    set_property CONFIG.C_DEBUG_MODE  {3} [get_bd_cells $device_name]
+    set_property CONFIG.C_DESIGN_TYPE {0} [get_bd_cells $device_name]
+
+    #connect to AXI, clk, and reset between slave and mastre
+    [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+
+    
+    #generate ports for the JTAG signals
+    make_bd_pins_external       [get_bd_cells $device_name]
+    make_bd_intf_pins_external  [get_bd_cells $device_name]
+        puts "sup?"
+    #build the DTSI chunk for this device to be a UIO
+    [AXI_DEV_UIO_DTSI_POST_CHUNK $device_name]
+        puts "sup?"
 }

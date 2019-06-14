@@ -58,14 +58,14 @@ entity top is
 
 
 --    clk_in            : in    std_logic;
---    XVC0_tck          : out   STD_LOGIC;
---    XVC0_tdi          : out   STD_LOGIC;
---    XVC0_tdo          : in    STD_LOGIC;
---    XVC0_tms          : out   STD_LOGIC;
---    XVC1_tck          : out   STD_LOGIC;
---    XVC1_tdi          : out   STD_LOGIC;
---    XVC1_tdo          : in    STD_LOGIC;
---    XVC1_tms          : out   STD_LOGIC;
+    XVC0_tck          : out   STD_LOGIC;
+    XVC0_tdi          : out   STD_LOGIC;
+    XVC0_tdo          : in    STD_LOGIC;
+    XVC0_tms          : out   STD_LOGIC;
+    XVC1_tck          : out   STD_LOGIC;
+    XVC1_tdi          : out   STD_LOGIC;
+    XVC1_tdo          : in    STD_LOGIC;
+    XVC1_tms          : out   STD_LOGIC;
 --
 --    -------------------------------------------------------------------------------------------
 --    -- MGBT 1
@@ -103,6 +103,8 @@ entity top is
 --    m1_tts_N          : in    std_logic;                       
 --    m2_tts_P          : in    std_logic; 
 --    m2_tts_N          : in    std_logic
+    IPMC_SDA : inout STD_LOGIC;
+    IPMC_SCL : in    STD_LOGIC;
     SI_scl : inout STD_LOGIC;
     SI_sda : inout STD_LOGIC
 
@@ -246,10 +248,10 @@ architecture structure of top is
 --  signal C2C_gt_qpllrefclk_quad4 : std_logic;
 
 -- AXI BUS
-  signal AXI_BUS_RMOSI : AXIReadMOSI_array_t(0 to 0) := (others => DefaultAXIReadMOSI);
-  signal AXI_BUS_RMISO : AXIReadMISO_array_t(0 to 0) := (others => DefaultAXIReadMISO);
-  signal AXI_BUS_WMOSI : AXIWriteMOSI_array_t(0 to 0) := (others => DefaultAXIWriteMOSI);
-  signal AXI_BUS_WMISO : AXIWriteMISO_array_t(0 to 0) := (others => DefaultAXIWriteMISO);
+  signal AXI_BUS_RMOSI : AXIReadMOSI_array_t(0 to 1) := (others => DefaultAXIReadMOSI);
+  signal AXI_BUS_RMISO : AXIReadMISO_array_t(0 to 1) := (others => DefaultAXIReadMISO);
+  signal AXI_BUS_WMOSI : AXIWriteMOSI_array_t(0 to 1) := (others => DefaultAXIWriteMOSI);
+  signal AXI_BUS_WMISO : AXIWriteMISO_array_t(0 to 1) := (others => DefaultAXIWriteMISO);
 
 
   --Monitoring
@@ -277,6 +279,12 @@ architecture structure of top is
 
   signal SI_OE_normal : std_logic;
   signal SI_EN_normal : std_logic;
+  signal Si_handoff_to_PS : std_logic;
+  
+  signal IPMC_SDA_o : std_logic;
+  signal IPMC_SDA_t : std_logic;
+  signal IPMC_SDA_i : std_logic;
+  
   
 begin  -- architecture structure
 
@@ -346,17 +354,37 @@ begin  -- architecture structure
       SERV_wdata                => AXI_BUS_WMOSI(0).data,
       SERV_wready               => AXI_BUS_WMISO(0).ready_for_data,
       SERV_wstrb                => AXI_BUS_WMOSI(0).data_write_strobe,
-      SERV_wvalid               => AXI_BUS_WMOSI(0).data_valid
+      SERV_wvalid               => AXI_BUS_WMOSI(0).data_valid,
+
+      SLAVE_I2C_araddr               => AXI_BUS_RMOSI(1).address,
+      SLAVE_I2C_arprot               => AXI_BUS_RMOSI(1).protection_type,
+      SLAVE_I2C_arready              => AXI_BUS_RMISO(1).ready_for_address,
+      SLAVE_I2C_arvalid              => AXI_BUS_RMOSI(1).address_valid,
+      SLAVE_I2C_awaddr               => AXI_BUS_WMOSI(1).address,
+      SLAVE_I2C_awprot               => AXI_BUS_WMOSI(1).protection_type,
+      SLAVE_I2C_awready              => AXI_BUS_WMISO(1).ready_for_address,
+      SLAVE_I2C_awvalid              => AXI_BUS_WMOSI(1).address_valid,
+      SLAVE_I2C_bready               => AXI_BUS_WMOSI(1).ready_for_response,
+      SLAVE_I2C_bresp                => AXI_BUS_WMISO(1).response,
+      SLAVE_I2C_bvalid               => AXI_BUS_WMISO(1).response_valid,
+      SLAVE_I2C_rdata                => AXI_BUS_RMISO(1).data,
+      SLAVE_I2C_rready               => AXI_BUS_RMOSI(1).ready_for_data,
+      SLAVE_I2C_rresp                => AXI_BUS_RMISO(1).response,
+      SLAVE_I2C_rvalid               => AXI_BUS_RMISO(1).data_valid,
+      SLAVE_I2C_wdata                => AXI_BUS_WMOSI(1).data,
+      SLAVE_I2C_wready               => AXI_BUS_WMISO(1).ready_for_data,
+      SLAVE_I2C_wstrb                => AXI_BUS_WMOSI(1).data_write_strobe,
+      SLAVE_I2C_wvalid               => AXI_BUS_WMOSI(1).data_valid,
 
 
---      tap_tck_0                 => XVC0_tck,
---      tap_tdi_0                 => XVC0_tdi,
---      tap_tdo_0                 => XVC0_tdo,
---      tap_tms_0                 => XVC0_tms,
---      tap_tck_1                 => XVC1_tck,
---      tap_tdi_1                 => XVC1_tdi,
---      tap_tdo_1                 => XVC1_tdo,
---      tap_tms_1                 => XVC1_tms,
+      tap_tck_0                 => XVC0_tck,
+      tap_tdi_0                 => XVC0_tdi,
+      tap_tdo_0                 => XVC0_tdo,
+      tap_tms_0                 => XVC0_tms,
+      tap_tck_1                 => XVC1_tck,
+      tap_tdi_1                 => XVC1_tdi,
+      tap_tdo_1                 => XVC1_tdo,
+      tap_tms_1                 => XVC1_tms
 --
 --      AXIS_RX_0_tdata             => AXI_C2CM1_RX_data(63 downto 0),
 --      AXIS_RX_0_tvalid            => AXI_C2CM1_RX_dv,
@@ -663,7 +691,8 @@ begin  -- architecture structure
       SCL_o_normal => SCL_o_normal,
       SCL_t_normal => SCL_t_normal,
       SI_OE_normal => SI_OE_normal,
-      SI_EN_normal => SI_EN_normal);
+      SI_EN_normal => SI_EN_normal,
+      handoff     => Si_handoff_to_PS);
 
 
   services_1: entity work.services
@@ -681,6 +710,7 @@ begin  -- architecture structure
       SI_LOS          => SI_LOS,
       SI_OUT_EN       => SI_OE_normal,
       SI_ENABLE       => SI_EN_normal,
+      SI_Handoff      => Si_handoff_to_PS,
       TTC_SRC_SEL     => TTC_SRC_SEL,
       LHC_CLK_CMS_LOS => LHC_CLK_CMS_LOS,
       LHC_CLK_OSC_LOS => LHC_CLK_OSC_LOS,
@@ -695,6 +725,23 @@ begin  -- architecture structure
       ESM_LED_CLK     => ESM_LED_CLK,
       ESM_LED_SDA     => ESM_LED_SDA);
 
-  
-  
+  IPMC_i2c_slave_1: entity work.IPMC_i2c_slave
+    port map (
+      clk_axi     => pl_clk,
+      reset_axi_n => pl_reset_n,
+      readMOSI        => AXI_BUS_RMOSI(1),
+      readMISO        => AXI_BUS_RMISO(1),
+      writeMOSI       => AXI_BUS_WMOSI(1),
+      writeMISO       => AXI_BUS_WMISO(1),
+      SDA_o       => IPMC_SDA_o,
+      SDA_t       => IPMC_SDA_t,
+      SDA_i       => IPMC_SDA_i,
+      SCL         => IPMC_SCL);
+  IPMC_i2c_SDA : IOBUF
+    port map (
+      IO => IPMC_SDA,
+      I  => IPMC_SDA_o,
+      T  => IPMC_SDA_t,
+      O  => IPMC_SDA_i);
+
 end architecture structure;

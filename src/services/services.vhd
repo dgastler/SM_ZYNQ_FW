@@ -25,7 +25,8 @@ entity services is
     SI_LOS          : in  std_logic;
     SI_OUT_EN       : out std_logic;
     SI_ENABLE       : out std_logic;
-                    
+    SI_Handoff      : in  std_logic;
+    
     TTC_SRC_SEL     : out std_logic;
 
     LHC_CLK_CMS_LOS : in  std_logic;
@@ -120,6 +121,7 @@ begin  -- architecture behavioral
           localRdData( 4) <= not SI_INT;           -- SI5344 interrupt
           localRdData( 5) <= not SI_LOL;           -- SI5344 loss of lock
           localRdData( 6) <= not SI_LOS;           -- SI5344 loss of signal
+          localRdData(31) <= SI_Handoff;
         when x"4" =>                           
           localRdData( 0) <= reg_data(4)( 0);   -- TTC source select (0: TCDS, 1: TTC_FAKE)
         when x"5" =>                           

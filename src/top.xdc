@@ -52,14 +52,16 @@ set_property IOSTANDARD LVCMOS33 [get_ports {FIXED_IO_mio[0]}]
 # -------------------------------------------------------------------------------------------------
 # bank 13
 # -------------------------------------------------------------------------------------------------
-#set_property -dict {PACKAGE_PIN AB21 IOSTANDARD LVCMOS33} [get_ports {XVC0_tck}]
-#set_property -dict {PACKAGE_PIN AB19 IOSTANDARD LVCMOS33} [get_ports {XVC0_tdi}]
-#set_property -dict {PACKAGE_PIN AA19 IOSTANDARD LVCMOS33} [get_ports {XVC0_tdo}]
-#set_property -dict {PACKAGE_PIN AB22 IOSTANDARD LVCMOS33} [get_ports {XVC0_tms}]
-#set_property -dict {PACKAGE_PIN Y20  IOSTANDARD LVCMOS33} [get_ports {XVC1_tck}]
-#set_property -dict {PACKAGE_PIN W18  IOSTANDARD LVCMOS33} [get_ports {XVC1_tdi}]
-#set_property -dict {PACKAGE_PIN V18  IOSTANDARD LVCMOS33} [get_ports {XVC1_tdo}]
-#set_property -dict {PACKAGE_PIN V19  IOSTANDARD LVCMOS33} [get_ports {XVC1_tms}]
+set_property -dict {PACKAGE_PIN AB21 IOSTANDARD LVCMOS33} [get_ports {XVC0_tck}]
+set_property -dict {PACKAGE_PIN AB19 IOSTANDARD LVCMOS33} [get_ports {XVC0_tdi}]
+set_property -dict {PACKAGE_PIN AA19 IOSTANDARD LVCMOS33} [get_ports {XVC0_tdo}]
+set_property -dict {PACKAGE_PIN AB22 IOSTANDARD LVCMOS33} [get_ports {XVC0_tms}]
+set_property -dict {PACKAGE_PIN Y20  IOSTANDARD LVCMOS33} [get_ports {XVC1_tck}]
+set_property -dict {PACKAGE_PIN W18  IOSTANDARD LVCMOS33} [get_ports {XVC1_tdi}]
+set_property -dict {PACKAGE_PIN V18  IOSTANDARD LVCMOS33} [get_ports {XVC1_tdo}]
+set_property -dict {PACKAGE_PIN V19  IOSTANDARD LVCMOS33} [get_ports {XVC1_tms}]
+set_property -dict {PACKAGE_PIN AD26 IOSTANDARD LVCMOS33} [get_ports {IPMC_SDA}]
+set_property -dict {PACKAGE_PIN AE18 IOSTANDARD LVCMOS33} [get_ports {IPMC_SCL}]
 
 
 

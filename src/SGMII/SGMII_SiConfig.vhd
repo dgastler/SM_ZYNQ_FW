@@ -29,7 +29,8 @@ entity SGMII_SI_CONFIG is
     SCL_o_normal   : in  std_logic;
     SCL_t_normal   : in  std_logic;
     SI_OE_normal   : in  std_logic;
-    SI_EN_normal   : in  std_logic);
+    SI_EN_normal   : in  std_logic;
+    handoff        : out std_logic);
 
 end entity SGMII_SI_CONFIG;
 
@@ -245,7 +246,7 @@ begin  -- architecture behavioral
 
       SI_OE_N      <= '1';
       SI_EN        <= '0';
-      
+      handoff      <= '0';
     elsif state = SM_DONE then
       --Normal: Control given to PS/AXI PL
       SDA_i_normal <= SDA_i_phy;
@@ -259,6 +260,7 @@ begin  -- architecture behavioral
 
       SDA_i_SI <= '1';
       SCL_i_SI <= '1';
+      handoff  <= '1';
     else
       -- bootup: control given to init PL
       SDA_i_SI  <= SDA_i_phy;
@@ -272,7 +274,7 @@ begin  -- architecture behavioral
 
       SDA_i_normal <= '1';
       SCL_i_normal <= '1';
-
+      handoff      <= '0';
     end if;
   end process swap_signals;
   
