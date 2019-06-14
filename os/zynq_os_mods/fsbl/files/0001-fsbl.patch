@@ -1,0 +1,20 @@
+--- a/lib/sw_apps/zynq_fsbl/src/fsbl_hooks.c
++++ b/lib/sw_apps/zynq_fsbl/src/fsbl_hooks.c
+@@ -131,6 +131,17 @@
+ {
+ 	u32 Status;
+ 
++	/*https://www.beyond-circuits.com/wordpress/2018/05/updating-the-first-stage-bootloader-in-petalinux-v2017-4/*/
++	fsbl_printf(DEBUG_GENERAL,"Hi from FsblHookBeforeHandoff \r\n");
++	u32 counter = 0;
++	while(Xil_In32(0x43C20000)>>31){
++	  if(counter >= 0x0000ffff){
++	    fsbl_printf(DEBUG_GENERAL,"Si timeout \r\n");
++	    break;
++	  }
++	  counter++;
++	}
++
+ 	Status = XST_SUCCESS;
+ 
+ 	/*
