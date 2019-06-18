@@ -175,11 +175,17 @@ begin  -- architecture Behavioral
               when PERIOD_COUNT_075 =>
                 SCL_o <= '1'; SCL_t <= '0';
               when PERIOD_COUNT_050 =>
+
                 if bit_sequence = 8 then
                   ack <= not SDA_i;
                 end if;
               when PERIOD_COUNT_025 =>
                 SCL_o <= '0'; SCL_t <= '0';
+--                --? is this needed?
+--                if bit_sequence = 8 then
+--                  -- get ready for a stop condition
+--                  SDA_o <= '0'; SDA_t <= '0';
+--                end if;
               when PERIOD_COUNT_000 =>
                 if bit_sequence = 8 then
                   bit_sequence <= 0;
@@ -214,16 +220,19 @@ begin  -- architecture Behavioral
               when PERIOD_COUNT_075 =>
                 SCL_o <= '1'; SCL_t <= '0';
               when PERIOD_COUNT_050 =>
+                
                 if bit_sequence = 8 then
                   ack <= not SDA_i;
                 end if;
               when PERIOD_COUNT_025 =>
                 SCL_o <= '0'; SCL_t <= '0';
+--                -- hold line low
+--                SDA_o <= '0'; SDA_t <= '0';
               when PERIOD_COUNT_000 =>
                 if bit_sequence = 8 then
                   bit_sequence <= 0;
                   --ack bit
-                  if (IGNORE_ACK = '1') or (ack = '1') then
+                  if (IGNORE_ACK = '1') or (ack = '1') then                    
                     -- slave acked, move to next state
                     if reg_addr_byte /= 1 then                      
                       reg_addr_byte <= reg_addr_byte -1;
@@ -332,7 +341,7 @@ begin  -- architecture Behavioral
                 end if;
               when PERIOD_COUNT_075 =>
                 SCL_o <= '1'; SCL_t <= '0';
-              when PERIOD_COUNT_050 =>
+              when PERIOD_COUNT_050 =>                
                 if bit_sequence = 8 then
                   ack <= not SDA_i;
                 end if;
@@ -457,6 +466,7 @@ begin  -- architecture Behavioral
                 end if;
               when PERIOD_COUNT_025 =>
                 SCL_o <= '0'; SCL_t <= '0';
+                --? is this needed?
 --                if bit_sequence = 8 then
 --                  -- get ready for a stop condition
 --                  SDA_o <= '0'; SDA_t <= '0';
@@ -494,7 +504,7 @@ begin  -- architecture Behavioral
               when PERIOD_COUNT_100 =>
                 SDA_o  <= '0'; SDA_t <= '0';
               when PERIOD_COUNT_075 =>
-                SCL_o <= '1'; SCL_o <= '0';
+                SCL_o <= '1'; SCL_t <= '0';
               when PERIOD_COUNT_050 =>
                 SDA_o  <= '1'; SDA_t <= '0';
               when PERIOD_COUNT_000 =>

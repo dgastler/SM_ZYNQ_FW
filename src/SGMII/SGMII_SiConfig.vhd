@@ -57,12 +57,13 @@ architecture behavioral of SGMII_SI_CONFIG is
   signal write_data : slv_8_t;
   signal write_done : std_logic;
   signal   reg_counter     : integer range 0 to 511;
-  constant reg_counter_end : integer range 0 to 511 := 464;
+  constant reg_counter_end : integer range 0 to 511 := 465;--464;
 
 --  signal wait_counter : integer;
 --  constant wait_counter_start : integer := 6000000;0
-  signal   wait_counter       : uint26_t := (others => '0');--unsigned("00"&x"000000");
-  constant wait_counter_start : uint26_t := "11100100111000011100000000";--unsigned("11"&x"938700");
+  signal   wait_counter       : uint27_t := (others => '0');--unsigned("00"&x"000000");
+--  constant wait_counter_start : uint26_t := "11100100111000011100000000";--unsigned("11"&x"938700");
+  constant wait_counter_start : uint27_t := "111001001110000111000000000";--unsigned("11"&x"938700");
   
   signal page : slv_4_t;
   signal page_address : slv_8_t := x"01";
@@ -90,7 +91,8 @@ begin  -- architecture behavioral
   I2C_reg_master_1: entity work.I2C_reg_master
     generic map (
 --      I2C_QUARTER_PERIOD_CLOCK_COUNT => 500,
-      I2C_QUARTER_PERIOD_CLOCK_COUNT => 125,
+--      I2C_QUARTER_PERIOD_CLOCK_COUNT => 125,
+      I2C_QUARTER_PERIOD_CLOCK_COUNT => 500,
       USE_RESTART_FOR_READ_SEQUENCE  => '0')
     port map (
       clk_sys     => clk_200Mhz,

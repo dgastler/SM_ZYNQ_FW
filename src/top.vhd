@@ -166,10 +166,6 @@ architecture structure of top is
   signal pl_clk : std_logic;
   signal axi_reset_n : std_logic;
   signal axi_reset : std_logic;
---  signal readMOSI  : AXIReadMOSI;
---  signal readMISO  : AXIReadMISO;
---  signal writeMOSI : AXIWriteMOSI;
---  signal writeMISO : AXIWriteMISO;
 
   signal pl_reset_n : std_logic;
   

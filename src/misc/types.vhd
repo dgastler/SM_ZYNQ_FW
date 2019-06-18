@@ -34,6 +34,7 @@ package types is
 
   subtype uint32_t is unsigned(31 downto 0);
   subtype uint26_t is unsigned(25 downto 0);
+  subtype uint27_t is unsigned(26 downto 0);
 
   type u16_array_t is array (integer range <>) of unsigned(47 downto 0);
 
