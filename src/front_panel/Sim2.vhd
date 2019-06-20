@@ -38,24 +38,27 @@ end TopSim;
 architecture Behavioral of TopSim is
 
 component Loader
-generic (steps : integer := 4;
-         max   : integer := 10);
+generic (steps      : integer;
+         max        : integer;
+         flashrate  : integer);
     Port (clk       : in std_logic;
           reset     : in std_logic;
           load      : in std_logic;
-          print     : in std_logic;--
+          print     : in std_logic;
+          flash     : in std_logic;
           dataout   : out std_logic_vector (7 downto 0);
           busy      : out std_logic;
           SCK       : out std_logic;
-          SDA       : out std_logic);
+          SDA       : out std_logic;
+          test      : out std_logic_vector (5 downto 0));
 end component;
 
 --inputs
-signal clk, update, reset : std_logic;
-signal print : std_logic; --
+signal clk, update, reset, print, flash : std_logic; 
 --outputs
 signal dataout : std_logic_vector (7 downto 0);
 signal busy, SCK, SDA : std_logic;
+signal test : std_logic_vector (5 downto 0);
 
 
 
@@ -63,14 +66,17 @@ begin
 
     Sim: Loader 
     generic map (steps => 4,
-                 max => 10)
+                 max => 10,
+                 flashrate => 10)
     port map (dataout => dataout,
               clk => clk,
               load => update,
-              print => print,--
+              print => print,
+              flash => flash,
               reset => reset,
               busy => busy,
               SCK => SCK,
-              SDA => SDA);
+              SDA => SDA,
+              test => test);
               
 end Behavioral;
