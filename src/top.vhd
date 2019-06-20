@@ -280,7 +280,8 @@ architecture structure of top is
   signal IPMC_SDA_o : std_logic;
   signal IPMC_SDA_t : std_logic;
   signal IPMC_SDA_i : std_logic;
-  
+
+  signal  stupid_reset_test : std_logic;
   
 begin  -- architecture structure
 
@@ -324,12 +325,12 @@ begin  -- architecture structure
       ENET1_MDIO_MDC_0          => MDIO_ETHERNET_mdc     ,
       ENET1_MDIO_I_0            => MDIO_ETHERNET_mdio_i  ,
       ENET1_MDIO_O_0            => MDIO_ETHERNET_mdio_o  ,
-      SI_scl_i                  => SCL_i_normal,
-      SI_scl_o                  => SCL_o_normal,
-      SI_scl_t                  => SCL_t_normal,
-      SI_sda_i                  => SDA_i_normal,
-      SI_sda_o                  => SDA_o_normal,
-      SI_sda_t                  => SDA_t_normal,
+      SI_scl_i                  => SCL_i_phy,--SCL_i_normal,
+      SI_scl_o                  => SCL_o_phy,--SCL_o_normal,
+      SI_scl_t                  => SCL_t_phy,--SCL_t_normal,
+      SI_sda_i                  => SDA_i_phy,--SDA_i_normal,
+      SI_sda_o                  => SDA_o_phy,--SDA_o_normal,
+      SI_sda_t                  => SDA_t_phy,--SDA_t_normal,
       PL_CLK                    => pl_clk,
       PL_RESET_N                => pl_reset_n,
       SERV_araddr               => AXI_BUS_RMOSI(0).address,
@@ -662,33 +663,36 @@ begin  -- architecture structure
   onboard_CLK_1: entity work.onboard_CLK
     port map (
       clk_200Mhz => clk_200Mhz,
-      reset      => '0',
+      reset      =>  stupid_reset_test,--'0',
       locked     => clk_200Mhz_locked,
       clk_in1_n     => onboard_clk_n,
       clk_in1_p     => onboard_clk_p);
-  reset_200Mhz <= not clk_200Mhz_locked;
-  
-  SGMII_SI_CONFIG_1: entity work.SGMII_SI_CONFIG
-    port map (
-      clk_200Mhz   => clk_200Mhz,
-      reset        => reset_200Mhz,
-      SDA_i_phy    => SDA_i_phy,
-      SDA_o_phy    => SDA_o_phy,
-      SDA_t_phy    => SDA_t_phy,
-      SCL_i_phy    => SCL_i_phy,
-      SCL_o_phy    => SCL_o_phy,
-      SCL_t_phy    => SCL_t_phy,
-      SI_OE_N      => SI_OUT_DIS,
-      SI_EN        => SI_ENABLE,
-      SDA_i_normal => SDA_i_normal,
-      SDA_o_normal => SDA_o_normal,
-      SDA_t_normal => SDA_t_normal,
-      SCL_i_normal => SCL_i_normal,
-      SCL_o_normal => SCL_o_normal,
-      SCL_t_normal => SCL_t_normal,
-      SI_OE_normal => SI_OE_normal,
-      SI_EN_normal => SI_EN_normal,
-      handoff     => Si_handoff_to_PS);
+  reset_200Mhz <= not clk_200Mhz_locked ;
+  Si_handoff_to_PS <= '0';
+
+  SI_OUT_DIS <= not SI_OE_normal;
+  SI_ENABLE  <= SI_EN_normal;
+--  SGMII_SI_CONFIG_1: entity work.SGMII_SI_CONFIG
+--    port map (
+--      clk_200Mhz   => clk_200Mhz,
+--      reset        => reset_200Mhz,
+--      SDA_i_phy    => SDA_i_phy,
+--      SDA_o_phy    => SDA_o_phy,
+--      SDA_t_phy    => SDA_t_phy,
+--      SCL_i_phy    => SCL_i_phy,
+--      SCL_o_phy    => SCL_o_phy,
+--      SCL_t_phy    => SCL_t_phy,
+--      SI_OE_N      => SI_OUT_DIS,
+--      SI_EN        => SI_ENABLE,
+--      SDA_i_normal => SDA_i_normal,
+--      SDA_o_normal => SDA_o_normal,
+--      SDA_t_normal => SDA_t_normal,
+--      SCL_i_normal => SCL_i_normal,
+--      SCL_o_normal => SCL_o_normal,
+--      SCL_t_normal => SCL_t_normal,
+--      SI_OE_normal => SI_OE_normal,
+--      SI_EN_normal => SI_EN_normal,
+--      handoff     => Si_handoff_to_PS);
 
 
   services_1: entity work.services
@@ -707,6 +711,7 @@ begin  -- architecture structure
       SI_OUT_EN       => SI_OE_normal,
       SI_ENABLE       => SI_EN_normal,
       SI_Handoff      => Si_handoff_to_PS,
+      SI_init_reset   => stupid_reset_test,
       TTC_SRC_SEL     => TTC_SRC_SEL,
       LHC_CLK_CMS_LOS => LHC_CLK_CMS_LOS,
       LHC_CLK_OSC_LOS => LHC_CLK_OSC_LOS,

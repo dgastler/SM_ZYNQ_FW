@@ -12,6 +12,7 @@ entity SGMII_SI_CONFIG is
   port (
     clk_200Mhz : in std_logic;
     reset  : in std_logic;
+
     SDA_i_phy    : in  std_logic;
     SDA_o_phy    : out std_logic;
     SDA_t_phy    : out std_logic;
@@ -258,7 +259,7 @@ begin  -- architecture behavioral
       SCL_o_phy    <= SCL_o_normal;
       SCL_t_phy    <= SCL_t_normal;
       SI_OE_N      <= not SI_OE_normal;
-      SI_EN        <=     SI_EN_normal;
+      SI_EN        <= SI_EN_normal;
 
       SDA_i_SI <= '1';
       SCL_i_SI <= '1';

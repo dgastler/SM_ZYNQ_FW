@@ -181,11 +181,11 @@ begin  -- architecture Behavioral
                 end if;
               when PERIOD_COUNT_025 =>
                 SCL_o <= '0'; SCL_t <= '0';
---                --? is this needed?
---                if bit_sequence = 8 then
---                  -- get ready for a stop condition
---                  SDA_o <= '0'; SDA_t <= '0';
---                end if;
+                --? is this needed?
+                if bit_sequence = 8 then
+                  -- get ready for a stop condition
+                  SDA_o <= '0'; SDA_t <= '0';
+                end if;
               when PERIOD_COUNT_000 =>
                 if bit_sequence = 8 then
                   bit_sequence <= 0;
@@ -218,17 +218,20 @@ begin  -- architecture Behavioral
                   SDA_t <= '1';
                 end if;
               when PERIOD_COUNT_075 =>
-                SCL_o <= '1'; SCL_t <= '0';
+                SCL_o <= '1'; SCL_t <= '0'; 
               when PERIOD_COUNT_050 =>
-                
                 if bit_sequence = 8 then
                   ack <= not SDA_i;
                 end if;
               when PERIOD_COUNT_025 =>
                 SCL_o <= '0'; SCL_t <= '0';
---                -- hold line low
---                SDA_o <= '0'; SDA_t <= '0';
+
+                if bit_sequence = 8 then
+                  -- hold line low
+                  SDA_o <= '0'; SDA_t <= '0';                  
+                end if;
               when PERIOD_COUNT_000 =>
+                SCL_o <= '0'; SCL_t <= '0';
                 if bit_sequence = 8 then
                   bit_sequence <= 0;
                   --ack bit
@@ -456,22 +459,32 @@ begin  -- architecture Behavioral
                 else
                   -- get ready to read in a bit
 --                  SDA <= 'Z';
-                  SDA_t <= '1';
+
                 end if;
               when PERIOD_COUNT_075 =>
                 SCL_o <= '1'; SCL_t <= '0';
               when PERIOD_COUNT_050 =>
+
                 if bit_sequence = 8 then
                   ack <= not SDA_i;
                 end if;
+                if bit_sequence = 8 then
+                  SDA_o <= '0'; SDA_t <= '1';
+                end if;
               when PERIOD_COUNT_025 =>
-                SCL_o <= '0'; SCL_t <= '0';
+                SCL_o <= '0'; SCL_t <= '0';--
+                --test
                 --? is this needed?
 --                if bit_sequence = 8 then
 --                  -- get ready for a stop condition
 --                  SDA_o <= '0'; SDA_t <= '0';
 --                end if;
+                if bit_sequence = 8 then
+                  ack <= not SDA_i;
+                end if;
+
               when PERIOD_COUNT_000 =>
+                SCL_o <= '0'; SCL_t <= '0';--
                 if bit_sequence = 8 then
                   bit_sequence <= 0;
                   --shift the data down on word
@@ -505,7 +518,7 @@ begin  -- architecture Behavioral
                 SDA_o  <= '0'; SDA_t <= '0';
               when PERIOD_COUNT_075 =>
                 SCL_o <= '1'; SCL_t <= '0';
-              when PERIOD_COUNT_050 =>
+              when PERIOD_COUNT_025 =>
                 SDA_o  <= '1'; SDA_t <= '0';
               when PERIOD_COUNT_000 =>
                 state <= STATE_IDLE;

@@ -26,6 +26,7 @@ entity services is
     SI_OUT_EN       : out std_logic;
     SI_ENABLE       : out std_logic;
     SI_Handoff      : in  std_logic;
+    SI_init_reset   : out std_logic;
     
     TTC_SRC_SEL     : out std_logic;
 
@@ -118,6 +119,7 @@ begin  -- architecture behavioral
         when x"0" =>
           localRdData( 0) <= reg_data(0)( 0);   -- SI5344 OUTPUT ENABLE
           localRdData( 1) <= reg_data(0)( 1);   -- SI5344 ENABLE
+          localRdData( 2) <= reg_data(0)( 2);   -- SI5344 ENABLE
           localRdData( 4) <= not SI_INT;           -- SI5344 interrupt
           localRdData( 5) <= not SI_LOL;           -- SI5344 loss of lock
           localRdData( 6) <= not SI_LOS;           -- SI5344 loss of signal
@@ -157,6 +159,7 @@ begin  -- architecture behavioral
 
   SI_OUT_EN   <= reg_data(0)( 0);   -- SI5344 OUT_DIS
   SI_ENABLE   <= reg_data(0)( 1);   -- SI5344 ENABLE
+  SI_init_reset <= reg_data(0)(2);
   TTC_SRC_SEL <= reg_data(4)( 0);   -- TTC source select (0: TCDS, 1: TTC_FAKE)
   LHC_SRC_SEL <= reg_data(5)( 4);   -- LHC clk select
   HQ_SRC_SEL  <= reg_data(5)(12);   -- HQ clk select
@@ -175,6 +178,7 @@ begin  -- architecture behavioral
           when x"0" =>
             reg_data(0)( 0) <= localWrData( 0);   -- SI5344 OUTPUT ENABLE
             reg_data(0)( 1) <= localWrData( 1);   -- SI5344 ENABLE
+            reg_data(0)( 2) <= localWrData( 2);   -- SI5344 ENABLE
           when x"4" =>                           
             reg_data(4)( 0) <= localWrData( 0);   -- TTC source select (0: TCDS, 1: TTC_FAKE)
           when x"5" =>                           

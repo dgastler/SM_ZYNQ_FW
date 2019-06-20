@@ -91,7 +91,8 @@ proc AXI_PL_CONNECT {devices} {
     
     #create connections for each PL device
     foreach dev $devices {
-	[AXI_PL_DEV_CONNECT $dev  $AXI_INTERCONNECT_NAME $AXI_BUS_M($dev)  $AXI_BUS_CLK($dev)  $AXI_BUS_RST($dev)  $AXI_BUS_FREQ($dev) $AXI_ADDR($dev) $AXI_ADDR_RANGE($dev)]
+	#	[AXI_PL_DEV_CONNECT $dev  $AXI_INTERCONNECT_NAME $AXI_BUS_M($dev)  $AXI_BUS_CLK($dev)  $AXI_BUS_RST($dev)  $AXI_BUS_FREQ($dev) $AXI_ADDR($dev) $AXI_ADDR_RANGE($dev)]
+	[AXI_PL_DEV_CONNECT $dev ]
     }
 
     #this updates the address variables for dtsi_chunk generation, but can only be run after all AXI slaves are connected.
@@ -112,16 +113,25 @@ proc AXI_PL_CONNECT {devices} {
 #  axi_clk: the clock used for this axi slave/master channel
 #  axi_reset_n: the reset used for this axi slave/master channel
 #  axi_clk_freq: the frequency of the AXI clock used for slave/master
-proc AXI_PL_DEV_CONNECT {device_name axi_interconnect_name axi_master_name axi_clk axi_reset_n axi_clk_freq axi_address axi_address_range} {
+#proc AXI_PL_DEV_CONNECT {device_name axi_interconnect_name axi_master_name axi_clk axi_reset_n axi_clk_freq axi_address axi_address_range} {
+proc AXI_PL_DEV_CONNECT {device_name} {
+    global AXI_BUS_M
+    global AXI_BUS_RST
+    global AXI_BUS_CLK
+    global AXI_INTERCONNECT_NAME
+    global AXI_BUS_FREQ
+    global AXI_ADDR
+    global AXI_ADDR_RANGE
+
     startgroup
 
     #create axi port names
     set AXIS_PORT_NAME $device_name
     append AXI_PORT_NAME "_AXIS"    
 
-    set AXIM_NAME $axi_interconnect_name
+    set AXIM_NAME $AXI_INTERCONNECT_NAME
     append AXIM_NAME "/" 
-    append AXIM_NAME $axi_master_name
+    append AXIM_NAME $AXI_BUS_M($device_name)
 
     set AXIM_PORT_NAME $AXIM_NAME
     append AXIM_PORT_NAME "_AXI"
@@ -136,32 +146,32 @@ proc AXI_PL_DEV_CONNECT {device_name axi_interconnect_name axi_master_name axi_c
     
 
     #create clk and reset (-q to skip error if it already exists)
-    create_bd_port -q -dir I -type clk $axi_clk
-    create_bd_port -q -dir I -type rst $axi_reset_n
+    create_bd_port -q -dir I -type clk $AXI_BUS_CLK($device_name)
+    create_bd_port -q -dir I -type rst $AXI_BUS_RST($device_name)
 
     #setup clk/reset parameters
-    set_property CONFIG.FREQ_HZ $axi_clk_freq [get_bd_ports $axi_clk]
-    set_property CONFIG.ASSOCIATED_RESET $axi_reset_n [get_bd_ports $axi_clk]
+    set_property CONFIG.FREQ_HZ $AXI_BUS_FREQ($device_name) [get_bd_ports $AXI_BUS_CLK($device_name)]
+    set_property CONFIG.ASSOCIATED_RESET $AXI_BUS_RST($device_name) [get_bd_ports $AXI_BUS_CLK($device_name)]
 
     #connect AXI clk/reest ports to AXI interconnect master
-    connect_bd_net [get_bd_ports $axi_reset_n] [get_bd_pins $AXIM_RSTN_NAME]
-    connect_bd_net [get_bd_ports $axi_clk]     [get_bd_pins $AXIM_CLK_NAME]
+    connect_bd_net [get_bd_ports $AXI_BUS_RST($device_name)]     [get_bd_pins $AXIM_RSTN_NAME]
+    connect_bd_net [get_bd_ports $AXI_BUS_CLK($device_name)]     [get_bd_pins $AXIM_CLK_NAME]
 
 
     #set bus properties
     set_property CONFIG.PROTOCOL AXI4LITE [get_bd_intf_ports $AXIS_PORT_NAME]
-    set_property CONFIG.ASSOCIATED_BUSIF  $device_name [get_bd_ports $axi_clk]
+    set_property CONFIG.ASSOCIATED_BUSIF  $device_name [get_bd_ports $AXI_BUS_CLK($device_name)]
 
     
 
     #add addressing
-    if {$axi_address == -1} {
+    if {$AXI_ADDR($device_name) == -1} {
 	puts "Automatically setting $device_name address"
 	assign_bd_address [get_bd_addr_segs {$device_name/Reg }]
     } else {
-	puts "Manually setting $device_name address to $axi_address $axi_address_range"
+	puts "Manually setting $device_name address to $AXI_ADDR($device_name) $AXI_ADDR_RANGE($device_name)"
 
-	assign_bd_address -verbose -range $axi_address_range -offset $axi_address [get_bd_addr_segs $device_name/Reg]
+	assign_bd_address -verbose -range $AXI_ADDR_RANGE($device_name) -offset $AXI_ADDR($device_name) [get_bd_addr_segs $device_name/Reg]
 	
     }
 

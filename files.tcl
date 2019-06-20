@@ -16,13 +16,13 @@ set vhdl_files "\
      src/SGMII/SGMII_INTF_resets.vhd \
      src/services/services.vhd \
      src/services/SGMII_MON_pkg.vhd \
-     src/SGMII/i2c_package.vhd \
-     src/SGMII/I2C_reg_master.vhd \
-     src/SGMII/SGMII_SiConfig.vhd \
-     src/SGMII/SGMII_SiConfig_data.vhd \
      src/IPMC_i2c_slave/i2c_slave.vhd \
      src/IPMC_i2c_slave/IPMC_i2c_slave.vhd \
      "
+#     src/SGMII/i2c_package.vhd \
+#     src/SGMII/I2C_reg_master.vhd \
+#     src/SGMII/SGMII_SiConfig.vhd \
+#     src/SGMII/SGMII_SiConfig_data.vhd \
 
 set xdc_files src/top.xdc
 
