@@ -44,7 +44,7 @@ entity Loader is
              busy       : out std_logic;
              SCK        : out std_logic;
              SDA        : out std_logic;
-             test       : out std_logic_vector (5 downto 0));
+             test       : out std_logic_vector (5 downto 0)); --delete
 end Loader;
 
 architecture Behavioral of Loader is
@@ -110,7 +110,7 @@ U1 : SR_out
               
 --continuous assignment of outputs
 busy <= active;
-test <= std_logic_vector(position); --for simmulation
+test <= std_logic_vector(position); --delete
 
 --Main process
 Main: process (clk,reset)
