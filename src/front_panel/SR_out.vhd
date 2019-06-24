@@ -50,13 +50,8 @@ signal active : std_logic; --Buffer for busy
 signal SCK2 : std_logic; --Buffer for SCK
 
 --counters
-signal SCKcount : integer; --for counting SCK incriments
-signal shiftcount: integer; --for counting shifts in shiftreg
-
---testing with unsigned
---signal shiftcount : unsigned(2 downto 0 ) := (others => '0');
-
-
+signal SCKcount : integer; --for counting SCK incriments to steps
+signal shiftcount : unsigned (2 downto 0); --for counting the number of shifts
 
 --pulses for signaling
 signal SCKpulse : std_logic; --for signaling SCK flip
@@ -106,7 +101,7 @@ begin
         dataout <= X"00";
         shiftreg <= X"00";
         SCK2 <= '0';
-        shiftcount <= 0;                                                                                                  
+        shiftcount <= "000";--shiftcount <= 0;                                                                                                  
         
     elsif clk'event and clk='1' then
         --if not active then wait for an update to load in new data
@@ -127,10 +122,10 @@ begin
                 if SCK2 = '1' then
                     --count shifts
                     shiftreg <= shiftreg(6 downto 0) & '0';
-                    shiftcount <= shiftcount + 1;
+                    shiftcount <= shiftcount + 1; --shiftcount <= shiftcount + 1;
                     --at 8 shifts deactivate and reset shift count
-                    if shiftcount = 7 then
-                        shiftcount <= 0;
+                    if shiftcount = 7 then --shiftcount = 7 then
+                        shiftcount <= "000"; -- shiftcount <= 0;
                         active <= '0';            
                     end if;
                 end if;

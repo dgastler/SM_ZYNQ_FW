@@ -37,9 +37,9 @@ entity Loader is
              flashrate  : integer := 10);
     Port    (clk        : in std_logic;
              reset      : in std_logic;
-             load       : in std_logic;
-             print      : in std_logic;
-             flash      : in std_logic;
+             load       : in std_logic; --displays next LED config
+             print      : in std_logic; --flashes position
+             flash      : in std_logic; --flashes current LED config
              dataout    : out std_logic_vector (7 downto 0);
              busy       : out std_logic;
              SCK        : out std_logic;
@@ -72,14 +72,14 @@ others => x"FF"
 --register for loading data
 signal LoadData : std_logic_vector(7 downto 0);
 
---Signal for steps of updating and being active
-signal update: std_logic;
-signal active: std_logic;
+--1-bit signals
+signal update: std_logic; --used to update
+signal active: std_logic; --used to buffer busy output, never assign directly to this
+signal flashbit: std_logic; --used for flashing data or 0
 
---for counting "position in register"
-signal position: unsigned (5 downto 0);
---for counting flash timing
-signal flashcount : integer;
+--counters
+signal position: unsigned (5 downto 0); --to count position in register
+signal flashcount : integer; --to count flash timing
 
 --Declare SR_out
 component SR_out
@@ -117,20 +117,19 @@ Main: process (clk,reset)
 begin
     --reset
     if reset = '1' then
-        --return position and state
+        --reset counters & position
+        flashcount <= 0;
+        position <= "000000";
+        flashbit <= '0';
+        --return state
         if state = Blink then
-            position <= "000000";
-            state <= Blink; --find spot
+            state <= Blink;
         else
-            position <= "000000";
             State <= SR;
         end if;
-        --flashcount goes to 0
-        flashcount <= 0;
 
     --on posedge clk
     elsif clk'event and clk='1' then
-    
     
         --In readout state
         if state = SR then
@@ -139,6 +138,7 @@ begin
                 --if print is active then switch states
                 if print = '1' then
                     state <= Display;
+                    --position <= position - 1;
                 else
                     if flash = '1' then
                         position <= position - 1;
@@ -164,51 +164,54 @@ begin
                     end if; 
                 end if;
             end if;  
-            
-            
+                   
         --Display state 
         elsif state = Display then
             --load position vector into datain and trigger update
             if active = '0' then
                 loaddata <= "00" & std_logic_vector(position);--
                 update <= '1';
-            else--
+            else
                 --set update low and return to readout state
-                if update = '1' then
-                    update <= '0';
-                    State <= SR;
-                end if;
+                update <= '0';
+                State <= SR;
             end if;
-        
         
         --Flashing state
         elsif state = Blink then
-            
+            --if flash is turned off
             if flash = '0' then
+                --make sure loaddata get set to data
+                loaddata <= data(to_integer(position)); --maybe del
+                --wait for last flash to finish then return to readout state & readout data 1 more time
                 if active = '0' then
-                    --position <= position - 1;
                     state <= SR;
                     update <= '1';
+                end if;   
+            else --While flash is on
+                --load in data or 0 depending on flashbit
+                if flashbit = '1' then
+                    loaddata <= data(to_integer(position));
+                else
+                    loaddata <= X"00";
                 end if;
-            else
-                loaddata <= data(to_integer(position));
+                
                 if active = '0' then
+                    --timing between flashes
                     flashcount <= flashcount + 1;
                     if flashcount = flashrate - 1 then
                         flashcount <= 0;
                         update <= '1';
+                        --flip flashbit
+                        flashbit <= not flashbit;
                     end if;
                 else
                     update <= '0';
                 end if;
-                    
-            
             end if;
-            
-            
-            
-        end if;
-    end if;
+             
+        end if; --end state machine
+    end if; --end machine w/ reset
     
 end process;
 end Behavioral;
