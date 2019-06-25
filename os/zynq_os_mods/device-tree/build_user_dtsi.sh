@@ -9,9 +9,9 @@ fi
 filename=/dev/stdout
 
 #Collect all the dtsi chunk files that go in the root /{ namespace
-chunks=$(find $DTSI_PATH -name *dtsi_chunk)
+chunks=$(find $DTSI_PATH -name "*dtsi_chunk")
 #collect all the dtsi post chunks that go oustide of the /{ namespace
-post_chunks=$(find $DTSI_PATH -name *dtsi_post_chunk)
+post_chunks=$(find $DTSI_PATH -name "*dtsi_post_chunk")
 
 #output updated dtsi fle
 echo "/include/ \"system-conf.dtsi\"" > $filename

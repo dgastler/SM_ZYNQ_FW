@@ -431,6 +431,7 @@ CONFIG_canutils=y
 #
 # ethtool 
 #
+CONFIG_ethtool=y
 # CONFIG_ethtool is not set
 # CONFIG_ethtool-dbg is not set
 # CONFIG_ethtool-dev is not set
@@ -452,6 +453,7 @@ CONFIG_canutils=y
 #
 # minicom 
 #
+CONFIG_minicom=y
 # CONFIG_minicom is not set
 # CONFIG_minicom-dbg is not set
 # CONFIG_minicom-dev is not set
