@@ -32,9 +32,9 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity Loader is
-    generic (steps      : integer := 4;
-             max        : integer range 1 to 64 := 10;
-             flashrate  : integer := 10);
+    generic (steps      : integer := 4; --how many clk ticks corresond to a SCK tick
+             max        : integer range 1 to 64 := 10; --how many entries are in the Darray
+             flashrate  : integer := 10); --how many clk ticks are inbetween each falsh in blinking mode
     Port    (clk        : in std_logic;
              reset      : in std_logic;
              load       : in std_logic; --displays next LED config

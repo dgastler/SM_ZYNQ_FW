@@ -69,12 +69,12 @@ end component;
 
 begin
 
-D1 : TriDebouncer --using debouncer
-generic map (clkfreq => clkfreq)
-port map    (clk => clk,
-             reset => reset,
-             buttonin => buttonin,
-             buttonout => button);
+TD1 : TriDebouncer --using debouncer
+generic map (clkfreq    => clkfreq)
+port map    (clk        => clk,
+             reset      => reset,
+             buttonin   => buttonin,
+             buttonout  => button);
 
 --This process defines what each state does
 StateFcn: process (clk, reset) begin
