@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 use work.types.all;
 
-package CM_module is
+package CM_package is
 
   type to_CM_t is record
     UART_Tx : std_logic;
@@ -18,4 +18,4 @@ package CM_module is
     GPIO     : slv_3_t;
   end record from_CM_t;
 
-end package CM_module;
+end package CM_package;

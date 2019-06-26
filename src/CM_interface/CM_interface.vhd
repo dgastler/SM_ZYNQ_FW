@@ -7,6 +7,12 @@ use work.AXIRegPkg.all;
 use work.types.all;
 use work.CM_package.all;
 
+
+
+Library UNISIM;
+use UNISIM.vcomponents.all;
+
+
 entity CM_interface is
   
   port (
@@ -43,16 +49,14 @@ architecture behavioral of CM_interface is
   
 
   signal reg_data :  slv32_array_t(integer range 0 to 15);
-  constant Default_reg_data : slv32_array_t(integer range 0 to 15) := (0 => x"00000003",
-                                                                       4 => x"00000001",
-                                                                       5 => x"00001010",
-                                                                       8 => x"00000000",
+  constant Default_reg_data : slv32_array_t(integer range 0 to 15) := (0 => x"00000000",
                                                                        others => x"00000000");
 
 
-
+  signal enableCM : std_logic_vector(1 downto 0);
   signal CM1_disable : std_logic;
   signal CM2_disable : std_logic;
+  signal overridePWRGood : std_logic_vector(1 downto 0);
 begin  -- architecture behavioral
 
   -------------------------------------------------------------------------------
@@ -103,16 +107,18 @@ begin  -- architecture behavioral
       O => to_CM2_out.TCK);
 
 
-  CM_powerup: process (enableCM1,enableCM2,from_CM1.PWR_good,from_CM2.PWR_good) is
+  enableCM1 <= enableCM(0);
+  enableCM2 <= enableCM(1);
+  CM_powerup: process (enableCM(0),enableCM(1),from_CM1.PWR_good,from_CM2.PWR_good) is
   begin  -- process CM_powerup
       CM1_disable <= '1';
-      if enableCM1 = '1' then
-        CM1_disable <= not from_CM1.PWR_good;
+      if enableCM(0) = '1' then
+        CM1_disable <= (not from_CM1.PWR_good) or (not overridePWRGood(0));
       end if;
 
       CM2_disable <= '1';
-      if enableCM2 = '1' then
-        CM2_disable <= not from_CM2.PWR_good;
+      if enableCM(1) = '1' then
+        CM2_disable <= (not from_CM2.PWR_good) or (not overridePWRGood(1));
       end if;
   end process CM_powerup;
   
@@ -143,7 +149,10 @@ begin  -- architecture behavioral
       end if;
     end if;
   end process latch_reads;
-  
+
+  enableCM       ( 1 downto  0) <= reg_data(0)(1 downto 0); --CM1/2 enabled
+  overridePWRGood( 1 downto  0) <= reg_data(0)(3 downto 2); --CM1/2 override
+                                                            --power good
   reads: process (localRdReq,localAddress,reg_data) is
   begin  -- process reads
     localRdAck  <= '0';
@@ -151,7 +160,11 @@ begin  -- architecture behavioral
     if localRdReq = '1' then
       localRdAck  <= '1';
       case localAddress(3 downto 0) is
-        when x"0" => NULL;
+        when x"0" =>
+          localRdData( 3 downto  0) <= reg_data(0)( 3 downto  0);
+          localRdData( 4) <= not CM1_disable;  -- CM1 outputs enabled
+          localRdData( 5) <= not CM2_disable;  -- CM2 outputs enabled
+
         when others =>
           localRdData <= x"00000000";
       end case;
@@ -165,7 +178,8 @@ begin  -- architecture behavioral
     elsif clk_axi'event and clk_axi = '1' then  -- rising clock edge
       if localWrEn = '1' then
         case localAddress(3 downto 0) is
-          when x"0" => NULL;
+          when x"0" =>
+            reg_data(0)( 3 downto  0) <= localWrData(3 downto 0);
           when others => null;
         end case;
       end if;

@@ -67,6 +67,9 @@ architecture behavioral of services is
 
   signal ESM_LEDs : slv_16_t;
   signal ESM_clk_last : std_logic;
+
+  signal SGMII_MON_buf1 : SGMII_MONITOR_t;
+  signal SGMII_MON_buf2 : SGMII_MONITOR_t;
   
 begin  -- architecture behavioral
 
@@ -82,6 +85,8 @@ begin  -- architecture behavioral
       
     end if;
   end process ESM_LED_CAP;
+
+
 
   
   AXIRegBridge : entity work.axiLiteReg
@@ -99,6 +104,14 @@ begin  -- architecture behavioral
       read_req    => localRdReq,
       read_ack    => localRdAck);
 
+  latch_SGMII_domain: process (clk_axi) is
+  begin  -- process latch_SGMII_domain
+    if clk_axi'event and clk_axi = '1' then  -- rising clock edge
+      SGMII_MON_buf1 <= SGMII_MON;
+      SGMII_MON_buf2 <= SGMII_MON_buf1;
+    end if;
+  end process latch_SGMII_domain;
+  
 
   latch_reads: process (clk_axi) is
   begin  -- process latch_reads
@@ -141,13 +154,13 @@ begin  -- architecture behavioral
           localRdData(31 downto 16) <= ESM_LEDs; -- decoded ESM LEDs
         when x"C" =>
           localRdData( 0) <= reg_data(12)(0);   --overall SGMII reset input
-          localRdData( 1) <= SGMII_MON.pma_reset;   --overall SGMII reset output
-          localRdData( 2) <= SGMII_MON.mmcm_reset;  --SGMII mmcm reset
-          localRdData( 3) <= SGMII_MON.reset_done;  --last SGMII reset is done
+          localRdData( 1) <= SGMII_MON_buf2.pma_reset;   --overall SGMII reset output
+          localRdData( 2) <= SGMII_MON_buf2.mmcm_reset;  --SGMII mmcm reset
+          localRdData( 3) <= SGMII_MON_buf2.reset_done;  --last SGMII reset is done
 
-          localRdData( 4) <= SGMII_MON.cpll_lock;   --cpll lock
-          localRdData( 5) <= SGMII_MON.mmcm_locked;   --mmcm locked
-          localRdData(31 downto 16) <= SGMII_MON.status_vector; --SGMII status
+          localRdData( 4) <= SGMII_MON_buf2.cpll_lock;   --cpll lock
+          localRdData( 5) <= SGMII_MON_buf2.mmcm_locked;   --mmcm locked
+          localRdData(31 downto 16) <= SGMII_MON_buf2.status_vector; --SGMII status
                                                                 --vector
         when others =>
           localRdData <= x"00000000";

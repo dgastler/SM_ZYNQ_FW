@@ -46,20 +46,32 @@ set_property IOSTANDARD LVCMOS33 [get_ports {FIXED_IO_mio[0]}]
 
 
 # -------------------------------------------------------------------------------------------------
-# bank 12
+# bank 12 & 13
 # -------------------------------------------------------------------------------------------------
+set_property -dict {PACKAGE_PIN AB25 IOSTANDARD LVCMOS33} [get_ports {CM1_enable}]
+set_property -dict {PACKAGE_PIN  Y10 IOSTANDARD LVCMOS33} [get_ports {CM1_PWR_good}]
+set_property -dict {PACKAGE_PIN AE22 IOSTANDARD LVCMOS33} [get_ports {CM1_GPIO[0]}]
+set_property -dict {PACKAGE_PIN AF22 IOSTANDARD LVCMOS33} [get_ports {CM1_GPIO[1]}]
+set_property -dict {PACKAGE_PIN AC18 IOSTANDARD LVCMOS33} [get_ports {CM1_GPIO[2]}]
+set_property -dict {PACKAGE_PIN AE25 IOSTANDARD LVCMOS33} [get_ports {CM1_UART_TX}]
+set_property -dict {PACKAGE_PIN AE26 IOSTANDARD LVCMOS33} [get_ports {CM1_UART_RX}]
+set_property -dict {PACKAGE_PIN AB21 IOSTANDARD LVCMOS33} [get_ports {CM1_tck}]
+set_property -dict {PACKAGE_PIN AB19 IOSTANDARD LVCMOS33} [get_ports {CM1_tdi}]
+set_property -dict {PACKAGE_PIN AA19 IOSTANDARD LVCMOS33} [get_ports {CM1_tdo}]
+set_property -dict {PACKAGE_PIN AB22 IOSTANDARD LVCMOS33} [get_ports {CM1_tms}]
 
-# -------------------------------------------------------------------------------------------------
-# bank 13
-# -------------------------------------------------------------------------------------------------
-set_property -dict {PACKAGE_PIN AB21 IOSTANDARD LVCMOS33} [get_ports {XVC0_tck}]
-set_property -dict {PACKAGE_PIN AB19 IOSTANDARD LVCMOS33} [get_ports {XVC0_tdi}]
-set_property -dict {PACKAGE_PIN AA19 IOSTANDARD LVCMOS33} [get_ports {XVC0_tdo}]
-set_property -dict {PACKAGE_PIN AB22 IOSTANDARD LVCMOS33} [get_ports {XVC0_tms}]
-set_property -dict {PACKAGE_PIN Y20  IOSTANDARD LVCMOS33} [get_ports {XVC1_tck}]
-set_property -dict {PACKAGE_PIN W18  IOSTANDARD LVCMOS33} [get_ports {XVC1_tdi}]
-set_property -dict {PACKAGE_PIN V18  IOSTANDARD LVCMOS33} [get_ports {XVC1_tdo}]
-set_property -dict {PACKAGE_PIN V19  IOSTANDARD LVCMOS33} [get_ports {XVC1_tms}]
+set_property -dict {PACKAGE_PIN AA25 IOSTANDARD LVCMOS33} [get_ports {CM2_enable}]
+set_property -dict {PACKAGE_PIN AA10 IOSTANDARD LVCMOS33} [get_ports {CM2_PWR_good}]
+set_property -dict {PACKAGE_PIN AC19 IOSTANDARD LVCMOS33} [get_ports {CM2_GPIO[0]}]
+set_property -dict {PACKAGE_PIN AE23 IOSTANDARD LVCMOS33} [get_ports {CM2_GPIO[1]}]
+set_property -dict {PACKAGE_PIN AF23 IOSTANDARD LVCMOS33} [get_ports {CM2_GPIO[2]}]
+set_property -dict {PACKAGE_PIN AF24 IOSTANDARD LVCMOS33} [get_ports {CM2_UART_TX}]
+set_property -dict {PACKAGE_PIN AF25 IOSTANDARD LVCMOS33} [get_ports {CM2_UART_RX}]
+set_property -dict {PACKAGE_PIN Y20  IOSTANDARD LVCMOS33} [get_ports {CM2_tck}]
+set_property -dict {PACKAGE_PIN W18  IOSTANDARD LVCMOS33} [get_ports {CM2_tdi}]
+set_property -dict {PACKAGE_PIN V18  IOSTANDARD LVCMOS33} [get_ports {CM2_tdo}]
+set_property -dict {PACKAGE_PIN V19  IOSTANDARD LVCMOS33} [get_ports {CM2_tms}]
+
 set_property -dict {PACKAGE_PIN AD26 IOSTANDARD LVCMOS33} [get_ports {IPMC_SDA}]
 set_property -dict {PACKAGE_PIN AE18 IOSTANDARD LVCMOS33} [get_ports {IPMC_SCL}]
 
@@ -80,6 +92,8 @@ set_property -dict {PACKAGE_PIN AB20  IOSTANDARD LVCMOS33} [get_ports {FP_switch
 
 set_property -dict {PACKAGE_PIN AF18  IOSTANDARD LVCMOS33} [get_ports {ESM_LED_CLK       }]
 set_property -dict {PACKAGE_PIN AA24  IOSTANDARD LVCMOS33} [get_ports {ESM_LED_SDA       }]
+set_property -dict {PACKAGE_PIN AA23  IOSTANDARD LVCMOS33} [get_ports {ESM_UART_TX       }]
+set_property -dict {PACKAGE_PIN  W20  IOSTANDARD LVCMOS33} [get_ports {ESM_UART_RX       }]
 
 
 # -------------------------------------------------------------------------------------------------
@@ -134,106 +148,10 @@ set_property -dict {PACKAGE_PIN AD7}  [get_ports sgmii_rx_N]
 # -------------------------------------------------------------------------------------------------
 # axi c2c
 # -------------------------------------------------------------------------------------------------
-####set_property -dict {PACKAGE_PIN  R6}  [get_ports refclk_C2C_P[0] ]
-####set_property -dict {PACKAGE_PIN  R5}  [get_ports refclk_C2C_N[0] ]
-####
-####set_property -dict {PACKAGE_PIN AA2}  [get_ports AXI_C2C_Tx_P[0] ]
-####set_property -dict {PACKAGE_PIN AA1}  [get_ports AXI_C2C_Tx_N[0] ]
-####set_property -dict {PACKAGE_PIN AB4}  [get_ports AXI_C2C_Rx_P[0] ]
-####set_property -dict {PACKAGE_PIN AB3}  [get_ports AXI_C2C_Rx_N[0] ]
-####
-####
-####
-##### -------------------------------------------------------------------------------------------------
-##### fast ethernet
-##### -------------------------------------------------------------------------------------------------
-####
-##### set_property PACKAGE_PIN W14 [get_ports ETH1_CLK]
-##### set_property PACKAGE_PIN W17 [get_ports ETH1_INT_PWDN_N]
-##### set_property PACKAGE_PIN AD14 [get_ports ETH1_MDC]
-##### set_property PACKAGE_PIN AD11 [get_ports ETH1_MDIO]
-##### set_property PACKAGE_PIN AF14 [get_ports ETH1_RESET_N]
-##### set_property PACKAGE_PIN J11 [get_ports ETH1A_COL_PL]
-##### set_property PACKAGE_PIN G6 [get_ports ETH1A_CRS_PL]
-#####set_property PACKAGE_PIN J10 [get_ports ETH1A_LED_N_PL]
-##### set_property PACKAGE_PIN AC13 [get_ports ETH1A_RXCLK]
-##### set_property PACKAGE_PIN AE12 [get_ports {ETH1A_RXD[0]}]
-##### set_property PACKAGE_PIN AF12 [get_ports {ETH1A_RXD[1]}]
-##### set_property PACKAGE_PIN AE11 [get_ports {ETH1A_RXD[2]}]
-##### set_property PACKAGE_PIN AF10 [get_ports {ETH1A_RXD[3]}]
-##### set_property PACKAGE_PIN AE13 [get_ports ETH1A_RXDV]
-##### set_property PACKAGE_PIN AF13 [get_ports ETH1A_RXER]
-##### set_property PACKAGE_PIN AC12 [get_ports ETH1A_TXCLK]
-##### set_property PACKAGE_PIN AB12 [get_ports {ETH1A_TXD[0]}]
-##### set_property PACKAGE_PIN AC11 [get_ports {ETH1A_TXD[1]}]
-##### set_property PACKAGE_PIN AB11 [get_ports {ETH1A_TXD[2]}]
-##### set_property PACKAGE_PIN AB10 [get_ports {ETH1A_TXD[3]}]
-##### set_property PACKAGE_PIN AE10 [get_ports ETH1A_TXEN]
-##### set_property PACKAGE_PIN H11 [get_ports ETH1B_COL_PL]
-##### set_property PACKAGE_PIN G5 [get_ports ETH1B_CRS_PL]
-#####set_property PACKAGE_PIN J9 [get_ports ETH1B_LED_N_PL]
-##### set_property PACKAGE_PIN AC14 [get_ports ETH1B_RXCLK]
-##### set_property PACKAGE_PIN AF15 [get_ports {ETH1B_RXD[0]}]
-##### set_property PACKAGE_PIN AE15 [get_ports {ETH1B_RXD[1]}]
-##### set_property PACKAGE_PIN AD15 [get_ports {ETH1B_RXD[2]}]
-##### set_property PACKAGE_PIN AE16 [get_ports {ETH1B_RXD[3]}]
-##### set_property PACKAGE_PIN AD13 [get_ports ETH1B_RXDV]
-##### set_property PACKAGE_PIN AB14 [get_ports ETH1B_RXER]
-##### set_property PACKAGE_PIN AB15 [get_ports ETH1B_TXCLK]
-##### set_property PACKAGE_PIN AD16 [get_ports {ETH1B_TXD[0]}]
-##### set_property PACKAGE_PIN AE17 [get_ports {ETH1B_TXD[1]}]
-##### set_property PACKAGE_PIN AA17 [get_ports {ETH1B_TXD[2]}]
-##### set_property PACKAGE_PIN Y17 [get_ports {ETH1B_TXD[3]}]
-##### set_property PACKAGE_PIN AF17 [get_ports ETH1B_TXEN]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1_CLK]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1_INT_PWDN_N]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1_MDC]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1_MDIO]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1_RESET_N]
-##### set_property IOSTANDARD LVCMOS18 [get_ports ETH1A_COL_PL]
-##### set_property IOSTANDARD LVCMOS18 [get_ports ETH1A_CRS_PL]
-#####set_property IOSTANDARD LVCMOS18 [get_ports ETH1A_LED_N_PL]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1A_RXCLK]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_RXD[0]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_RXD[1]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_RXD[2]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_RXD[3]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1A_RXDV]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1A_RXER]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1A_TXCLK]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_TXD[0]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_TXD[1]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_TXD[2]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1A_TXD[3]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1A_TXEN]
-##### set_property IOSTANDARD LVCMOS18 [get_ports ETH1B_COL_PL]
-##### set_property IOSTANDARD LVCMOS18 [get_ports ETH1B_CRS_PL]
-#####set_property IOSTANDARD LVCMOS18 [get_ports ETH1B_LED_N_PL]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1B_RXCLK]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_RXD[0]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_RXD[1]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_RXD[2]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_RXD[3]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1B_RXDV]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1B_RXER]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1B_TXCLK]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_TXD[0]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_TXD[1]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_TXD[2]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports {ETH1B_TXD[3]}]
-##### set_property IOSTANDARD LVCMOS25 [get_ports ETH1B_TXEN]
-####
-####
-##### -------------------------------------------------------------------------------------------------
-##### module internal
-##### -------------------------------------------------------------------------------------------------
-####
-####
-##### -------------------------------------------------------------------------------------------------
-##### timing constraints
-##### -------------------------------------------------------------------------------------------------
-####
-####
-##### -------------------------------------------------------------------------------------------------
-##### eof
-##### -------------------------------------------------------------------------------------------------
+set_property -dict {PACKAGE_PIN  R6}  [get_ports refclk_C2C_P[0] ]
+set_property -dict {PACKAGE_PIN  R5}  [get_ports refclk_C2C_N[0] ]
+
+set_property -dict {PACKAGE_PIN AA2}  [get_ports AXI_C2C_Tx_P[0] ]
+set_property -dict {PACKAGE_PIN AA1}  [get_ports AXI_C2C_Tx_N[0] ]
+set_property -dict {PACKAGE_PIN AB4}  [get_ports AXI_C2C_Rx_P[0] ]
+set_property -dict {PACKAGE_PIN AB3}  [get_ports AXI_C2C_Rx_N[0] ]
