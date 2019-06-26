@@ -47,13 +47,14 @@ architecture Behavioral of TriButton is
 --constants used for timing
 constant longtime   : integer := clkfreq;
 constant shorttime  : integer := (clkfreq / 2);
+constant waittime   : integer := (clkfreq / 10);
 --counters
 signal count : integer range 0 to longtime;
 --state machine for main process
 type states is (SM_IDLE,       --Waiting for a button press
                 SM_WAIT,    --Timing how long button is held
-                SM_READ,       --waiting for a multipress
-                SM_HOLD);      --holding output
+                SM_READ,  --waiting for a multipress
+                SM_HOLD);  --used to buffer between button presses
 signal State : states;
 --1 bit signals
 signal twoflip : std_logic; --to recognize a double press
@@ -119,13 +120,16 @@ StateFcn: process (clk, reset) begin
                         short <= '1';
                     end if;
                 end if;
-            
+                
             when SM_HOLD =>
+                short <= '0';
+                long <= '0';
+                two <= '0';
                 count <= count + 1;
-                if count = (pulselength - 1) then
+                if count = clkfreq / 10 then
                     count <= 0;
                 end if;
-                 
+            
             when others => null;
         end case; --end state machine
     
@@ -166,12 +170,13 @@ StateFlow: process (clk, reset) begin
                 if count = shorttime then
                     State <= SM_HOLD;
                 end if;
-
+                
+                
             when SM_HOLD =>
-                if count = (pulselength - 1) then
+                if count = waittime  then
                     State <= SM_IDLE;
                 end if;
-                  
+  
             when others => 
                 State <= SM_IDLE;
         end case; --end state machine

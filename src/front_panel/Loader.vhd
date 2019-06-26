@@ -17,59 +17,48 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use IEEE.NUMERIC_STD.ALL; -- arithmetic functions with Signed or Unsigned values
 
 entity Loader is
-    generic (steps      : integer := 4; --how many clk ticks corresond to a SCK tick
-             max        : integer range 1 to 64 := 10; --how many entries are in the Darray
-             flashrate  : integer := 10); --how many clk ticks are inbetween each falsh in blinking mode
+    generic (clkfreq    : integer := 100000000; --onboad clock frequency in hz
+             steps      : integer := 4; --how many clk ticks corresond to a SCK tick
+             max        : integer range 1 to 64 := 10); --how many entries are in the Darray
     Port    (clk        : in std_logic;
              reset      : in std_logic;
              load       : in std_logic; --moves to the next register value
-             print      : in std_logic; --displays the current position in the register
+             prev       : in std_logic; --displays the current position in the register
              flash      : in std_logic; --blinks the current value
              dataout    : out std_logic_vector (7 downto 0);
              busy       : out std_logic;
              SCK        : out std_logic;
-             SDA        : out std_logic;
-             test       : out std_logic_vector (5 downto 0)); --delete
+             SDA        : out std_logic);
 end Loader;
 
 architecture Behavioral of Loader is
 
---State Machine for loader
-type states is (SR,      --state to readout next value
-                DISPLAY, --state to print current position
-                BLINK); --state to blink current value
-signal State : states;
-
 --array of 64 8-bit registers
 type Darray is array(0 to 63) of std_logic_vector(7 downto 0);
 signal data : Darray := (
-0 => x"00",
-1 => x"01",
-2 => x"02",
-3 => x"03",
-4 => x"04",
-5 => x"05",
-6 => x"06",
-7 => x"07",
-8 => x"08",
-9 => x"09",
+0 => x"0A",
+1 => x"0B",
+2 => x"0C",
+3 => x"0D",
+4 => x"0E",
+5 => x"0F",
+6 => x"A0",
+7 => x"B0",
+8 => x"C0",
+9 => x"D0",
 others => x"FF"
 );
+
+--State Machine
+type states is (IDLE,   --Idle
+                  PRINT,  --Print current value
+                  BLINK); --Blink position         
+signal State : states;
 
 --register for loading data
 signal LoadData : std_logic_vector(7 downto 0);
@@ -81,7 +70,11 @@ signal flashbit: std_logic; --used for flashing data or 0
 
 --counters
 signal position: unsigned (5 downto 0); --to count position in register
-signal flashcount : integer; --to count flash timing
+signal count : integer range 0 to clkfreq;
+
+--constants for timing
+signal refresh : integer := (clkfreq / 10); --1/10th of a second
+signal flashrate : integer := (clkfreq / 2); --half a second
 
 --Declare SR_out
 component SR_out
@@ -112,170 +105,133 @@ U1 : SR_out
               
 --continuous assignment of outputs
 busy <= active;
-test <= std_logic_vector(position); --delete
 
-StateFcn: process (clk,reset) begin
-    
-    if reset = '1' then
-        flashcount <= 0;
-        position <= "000000";
-        flashbit <= '0';
-        
-    elsif clk'event and clk='1' then
+--This process manages the position within the register
+Shift: process (clk, reset)
+begin
+  if reset = '1' then
+    position <= "000000";
 
-        case State is
-            when SR =>
-                if active = '0' then
-                    if print = '0' then
-                        if flash = '1' then
-                            position <= position - 1;
-                        else
-                            loaddata <= data(to_integer(position));
-                            if load = '1' then
-                                update <= '1';
-                            end if;
-                        end if;
-                    end if;
-                else
-                    if update = '1' then
-                        update <= '0';
-                        if to_integer(position) = max - 1 then
-                            position <= "000000";
-                        else
-                            position <= position + 1;
-                        end if;
-                    end if;
-                end if;
-            
-            when DISPLAY =>
-                if active = '0' then
-                    loaddata <= "00" & std_logic_vector(position);
-                    update <= '1';
-                else
-                    update <= '0';
-                end if;
-                    
-            when Blink =>
-                if flash = '0' then
-                    loaddata <= data(to_integer(position));
-                    --wait for last flash to finish then return to readout state & readout data 1 more time
-                    if active = '0' then
-                        --State <= SR;
-                        update <= '1';
-                    end if;
-                else --While flash is on
-                                        --load in data or 0 depending on flashbit
-                    if flashbit = '1' then
-                        loaddata <= data(to_integer(position));
-                    else
-                        loaddata <= X"00";
-                    end if;
-                    
-                    if active = '0' then
-                        --timing between flashes
-                        flashcount <= flashcount + 1;
-                        if flashcount = flashrate - 1 then
-                            flashcount <= 0;
-                            update <= '1';
-                            --flip flashbit
-                            flashbit <= not flashbit;
-                        end if;
-                    else
-                        update <= '0';
-                    end if;
-                end if;    
-            
-            when others => null;
-        end case; --end state machine
-    end if; --end clk & reset
-end process; --end StateFcn
-
-
-StateFlow: process (clk, reset) begin
-
-    if reset = '1' then
-        if State = BLINK then
-            State <= BLINK;
+  elsif clk'event and clk='1' then
+    if state /= BLINK then
+      if load = '1' then
+        if to_integer(position) = (max - 1) then
+          position <= "000000";
         else
-            State <= SR;
+          position <= position + 1;
+        end if;
+      elsif prev = '1' then
+        if position = "000000" then
+          position <= to_unsigned((max - 1), 6);
+        else
+          position <= position - 1;
+        end if;
+      end if;
+    else
+      position <= position;
+    end if; --end position movement
+  end if; --end clk & reset
+end process; --end position process
+
+        
+--This process is for the functionality of each state
+StateFcn3: process (clk, reset)
+begin
+  
+  if reset = '1' then
+    --set signals low
+    flashbit <= '0';
+    update <= '0';
+    --reset count
+    count <= 0;
+    
+  elsif clk'event and clk='1' then
+    --state machine
+    case State is
+      when IDLE => 
+        if flash = '1' then
+          --reset count if moving to BLINK b/c flash is high
+          count <= 0;
+          flashbit <= '0';
+        else --if not going to BLINK
+          --increment count
+          count <= count + 1;
+          if count = refresh then --at refrestrate
+            --load data, set update high
+            loaddata <= data(to_integer(position));
+            update <= '1';
+          end if;
+        end if;
+        
+      when PRINT => --set update low and reset count
+        update <= '0'; 
+        count <= 0;
+        
+      when BLINK =>
+        if active = '1' then
+          update <= '0'; --set update low
+        else
+          if flash <= '0' then
+            count <= 0; --if not in 
+          else
+            count <= count + 1;
+            if count = flashrate then
+              count <= 0; --reset count
+              flashbit <= not flashbit; --flip flashbit
+              if flashbit = '1' then --load position
+                loaddata <= "00" & std_logic_vector(position);
+                update <= '1';
+              else --load 0
+                loaddata <= X"00";
+                update <= '1';
+              end if;
+            end if;
+          end if;
+        end if;
+  
+      when others =>
+        null;
+        
+    end case; --end state machine
+  end if; --end clk & reset
+end process; --end StateFcn3
+
+StateFlow3: process (clk, reset)
+begin
+
+  --reset
+  if reset = '1' then
+    State <= IDLE;
+
+  elsif clk'event and clk='1' then
+    --state machine
+    case State is
+      when IDLE =>
+        --if flash is high go to BLINK
+        if flash = '1' then
+          state <= BLINK;
+        --if readout is active, move to PRINT state
+        elsif active = '1' then
+          State <= PRINT;
         end if;
 
-    elsif clk'event and clk='1' then
-        case State is
-            when SR =>
-                if active = '0' then
-                    if print = '1' then
-                        State <= DISPLAY;
-                    elsif flash = '1' then
-                        State <= BLINK;
-                    end if;
-                end if;
-            
-            when DISPLAY =>
-                if active = '1' then
-                    state <= SR;
-                end if;
+      when PRINT =>
+        --return to IDLE after readout completes
+        if active = '0' then
+          State <= IDLE;
+        end if;
+
+      when BLINK =>
+        --return to IDLE when flash is turned off
+        if flash = '0' then
+          state <= IDLE;
+        end if;
+
+      when others => --if broken, go to IDLE
+        State <= IDLE;
         
-            when Blink =>
-                if flash = '0' then --if flash = '0' and active = '0' then
-                    if active = '0' then
-                        State <= SR;
-                    end if;
-                end if;
-        
-            
-            when others => 
-                State <= SR;
-        end case; --end state machine
-    end if; --end clk & reset
-end process; --end StateFlow
-end Behavioral;
-
---StateFcn2: process (clk, reset) begin
---    if reset = '1'
-    
-    
-    
-    
---    elsif clk'event and clk='1' then
-    
---        case State is
-        
-    
-    
-    
---            when others => null;
---        end case; --end State Machine
---    end if; --end clk & reset
-
-
-
-
-
---end process; --end StateFcn2
-
---StateFlow2: process (clk, reset) begin
---    if reset = '1'
---        State <= IDLE;
-    
-    
-    
---    elsif clk'event and clk='1' then
-    
---        case State is
-        
-    
-    
-    
---        when others => 
---            State <= IDLE;
---        end case; --end state machine
---    end if; --end clk & reset
-
-
-
-
-
---end process; --end StateFlow2
---end Behavorial;
+    end case; --end state machine
+  end if; --end clk & reset
+end process; --end stateFcn3
+end Behavioral; --end it all
 

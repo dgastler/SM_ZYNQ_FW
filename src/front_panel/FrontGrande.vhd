@@ -35,15 +35,18 @@ entity FrontGrande is
     generic (clkfreq        : integer := 100000000; --frequency of onboard clock signal in hz 
              pulselength    : integer := 1; --how many clk ticks do you want an output to be high for
              steps          : integer := 10000000;--how many clk ticks corresond to a SCK tick --consider basing off of clkfreq
-             max            : integer := 10; --how many entries are in the Darray
-             flashrate      : integer := 1000); --how many clk ticks are inbetween each falsh in blinking mode, --consider basing off of clkfreq
+             max            : integer := 10); --how many entries are in the Darray
     Port    (clk            : in std_logic; --onboard clk
              reset          : in std_logic; --reset system
              buttonin       : in std_logic; --short press = load, long press = flash, two = print
              dataout        : out std_logic_vector (7 downto 0); --data out from register
              busy           : out std_logic; --indicates readout is active
              SCK            : out std_logic; --the "effective clk" of the readout
-             SDA            : out std_logic); --value being readout at SCK
+             SDA            : out std_logic;--); --value being readout at SCK
+             --for testing
+             tshort         : out std_logic;
+             tlong          : out std_logic;
+             ttwo           : out std_logic);
 end FrontGrande;
 
 architecture Behavioral of FrontGrande is
@@ -52,8 +55,8 @@ architecture Behavioral of FrontGrande is
 signal short    : std_logic;
 signal long     : std_logic;
 signal two      : std_logic;
---Testing signals
-signal test     : std_logic_vector (5 downto 0);
+--signal for treating a long press like a switch
+signal flipper  : std_logic;
 
 --Declare TriButton
 component TriButton
@@ -66,22 +69,22 @@ component TriButton
              long           : out std_logic;
              two            : out std_logic);
 end component; --end TriButton
+
 --Declare Loader
---component Loader
---    generic (steps      : integer;
---             max        : integer;
---             flashrate  : integer);
---    port    (clk        : in std_logic;
---             reset      : in std_logic;
---             load       : in std_logic;
---             print      : in std_logic;
---             flash      : in std_logic;
---             dataout    : out std_logic_vector (7 downto 0);
---             busy       : out std_logic;
---             SCK        : out std_logic;
---             SDA        : out std_logic;
---             test       : out std_logic_vector (5 downto 0));
---end component; --end Loader
+component Loader
+    generic (clkfreq    : integer;
+             steps      : integer;
+             max        : integer);
+    port    (clk        : in std_logic;
+             reset      : in std_logic;
+             load       : in std_logic;
+             prev       : in std_logic;
+             flash      : in std_logic;
+             dataout    : out std_logic_vector (7 downto 0);
+             busy       : out std_logic;
+             SCK        : out std_logic;
+             SDA        : out std_logic);
+end component; --end Loader
 
 begin
 
@@ -95,20 +98,34 @@ TB1 : TriButton --using triButton
                  long           => long,
                  two            => two);
                  
---L1 : Loader --using Loader
---    generic map (steps      => steps,
---                 max        => max,
---                 flashrate  => flashrate)
---    port map    (clk        => clk,
---                 reset      => reset,
---                 load       => short, --moves to the next register value
---                 print      => two, --displays the current position in the register
---                 flash      => long, --blinks the current value
---                 dataout    => dataout,
---                 busy       => busy,
---                 SCK        => SCK,
---                 SDA        => SDA,
---                 test       => test);
+L1 : Loader --using Loader
+    generic map (clkfreq    => clkfreq,
+                 steps      => steps,
+                 max        => max)
+    port map    (clk        => clk,
+                 reset      => reset,
+                 load       => short, --moves to the next register value
+                 prev       => two, --displays the current position in the register
+                 flash      => flipper, --blinks the current value
+                 dataout    => dataout,
+                 busy       => busy,
+                 SCK        => SCK,
+                 SDA        => SDA);
                  
-                 
+--for testin
+tshort <= short;
+tlong <= long;
+ttwo <= two;
+
+Main : process (clk, reset)
+begin
+    if reset = '1' then
+        flipper <= '0';
+        
+    elsif clk'event and clk='1' then
+        if long = '1' then
+            flipper <= not flipper;
+        end if;
+    end if;--end clk &reset
+end process;
 end Behavioral;

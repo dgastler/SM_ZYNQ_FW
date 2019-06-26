@@ -37,49 +37,49 @@ end TopSim;
 
 architecture Behavioral of TopSim is
 
-component Loader
-generic (steps      : integer;
-         max        : integer;
-         flashrate  : integer);
+component FrontGrande
+generic (clkfreq    : integer;
+         pulselength : integer;
+         steps      : integer;
+         max        : integer);
     Port (clk       : in std_logic;
           reset     : in std_logic;
-          load      : in std_logic;
-          print     : in std_logic;
-          flash     : in std_logic;
+          buttonin  : in std_logic;
           dataout   : out std_logic_vector (7 downto 0);
           busy      : out std_logic;
           SCK       : out std_logic;
           SDA       : out std_logic;
-          test      : out std_logic_vector (5 downto 0));
+          tshort    : out std_logic;
+          tlong     : out std_logic;
+          ttwo      : out std_logic);
 end component;
 
 --inputs
-signal clk, update, reset, print, flash : std_logic; --delete
---signal clk, reset, buttonin
+signal clk, reset, buttonin : std_logic;
 --outputs
 signal dataout : std_logic_vector (7 downto 0);
 signal busy, SCK, SDA : std_logic; 
-signal test : std_logic_vector (5 downto 0); --delete
+--test outputs
+signal tshort, tlong, ttwo : std_logic;
 
 
 
 begin
 
-    Sim: Loader --FrontGrande 
-    generic map (--clkfreq => 100000000,
-                 --pulselength => 1,
-                 steps => 4,
-                 max => 10,
-                 flashrate => 10)
-    port map (clk => clk,
-              reset => reset,
-              load => update, --buttonin => buttonin
-              dataout => dataout,
-              busy => busy,
-              SCK => SCK,
-              SDA => SDA,
-              print => print, --delete
-              flash => flash, --delete
-              test => test); --delete
+Sim: FrontGrande 
+generic map (clkfreq => 100,
+             pulselength => 1,
+             steps => 4,
+             max => 10)
+port map    (clk => clk,
+             reset => reset,
+             buttonin => buttonin,
+             dataout => dataout,
+             busy => busy,
+             SCK => SCK,
+             SDA => SDA,
+             tshort => tshort,
+             tlong => tlong,
+             ttwo => ttwo);
               
 end Behavioral;
