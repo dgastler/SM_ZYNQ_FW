@@ -48,12 +48,12 @@ architecture Behavioral of TriButton is
 constant longtime   : integer := clkfreq;
 constant shorttime  : integer := (clkfreq / 2);
 --counters
-signal count : integer;
+signal count : integer range 0 to longtime;
 --state machine for main process
-type states is (IDLE,       --Waiting for a button press
-                WAITING,    --Timing how long button is held
-                READ,       --waiting for a multipress
-                HOLD);      --holding output
+type states is (SM_IDLE,       --Waiting for a button press
+                SM_WAIT,    --Timing how long button is held
+                SM_READ,       --waiting for a multipress
+                SM_HOLD);      --holding output
 signal State : states;
 --1 bit signals
 signal twoflip : std_logic; --to recognize a double press
@@ -85,7 +85,7 @@ StateFcn: process (clk, reset) begin
     
         case State is
         
-            when IDLE =>
+            when SM_IDLE =>
                 --no counting
                 count <= 0;
                 --no outputs
@@ -95,7 +95,7 @@ StateFcn: process (clk, reset) begin
                 --twoflip is 0;
                 twoflip <= '0';
                 
-            when WAITING =>
+            when SM_WAIT =>
                 if button = '1' then
                     count <= count + 1;
                     if count = longtime then
@@ -106,7 +106,7 @@ StateFcn: process (clk, reset) begin
                     count <= 0;
                 end if;
             
-            when READ =>
+            when SM_READ =>
                 count <= count + 1;
                 if button = '1' then
                     twoflip <= '1';
@@ -120,7 +120,7 @@ StateFcn: process (clk, reset) begin
                     end if;
                 end if;
             
-            when HOLD =>
+            when SM_HOLD =>
                 count <= count + 1;
                 if count = (pulselength - 1) then
                     count <= 0;
@@ -139,40 +139,41 @@ end process; --end StateFcn
 StateFlow: process (clk, reset) begin
     
     if reset = '1' then
-        state <= IDLE;
+        state <= SM_IDLE;
     
     
     elsif clk'event and clk='1' then
         
         case State is 
         
-            when IDLE =>
+            when SM_IDLE =>
                 if button = '1' then
-                    State <= WAITING;
+                    State <= SM_WAIT;
                 else   
-                    State <= IDLE;
+                    State <= SM_IDLE;
                 end if;
                 
-            when WAITING =>
+            when SM_WAIT =>
                 if button = '1' then
                     if count = longtime then
-                        State <= HOLD;
+                        State <= SM_HOLD;
                     end if;
                 else
-                    State <= READ;
+                    State <= SM_READ;
                 end if;
             
-            when READ =>
+            when SM_READ =>
                 if count = shorttime then
-                    State <= HOLD;
+                    State <= SM_HOLD;
                 end if;
 
-            when HOLD =>
+            when SM_HOLD =>
                 if count = (pulselength - 1) then
-                    State <= IDLE;
+                    State <= SM_IDLE;
                 end if;
                   
-            when others => null;
+            when others => 
+                State <= SM_IDLE;
         end case; --end state machine
     
     

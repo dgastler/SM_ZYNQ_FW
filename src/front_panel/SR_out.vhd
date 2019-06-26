@@ -50,7 +50,7 @@ signal active : std_logic; --Buffer for busy
 signal SCK2 : std_logic; --Buffer for SCK
 
 --counters
-signal SCKcount : integer; --for counting SCK incriments to steps
+signal SCKcount : integer range 0 to steps; --for counting SCK incriments to steps
 signal shiftcount : unsigned (2 downto 0); --for counting the number of shifts
 
 --pulses for signaling

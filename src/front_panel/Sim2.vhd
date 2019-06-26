@@ -54,29 +54,32 @@ generic (steps      : integer;
 end component;
 
 --inputs
-signal clk, update, reset, print, flash : std_logic; 
+signal clk, update, reset, print, flash : std_logic; --delete
+--signal clk, reset, buttonin
 --outputs
 signal dataout : std_logic_vector (7 downto 0);
-signal busy, SCK, SDA : std_logic;
-signal test : std_logic_vector (5 downto 0);
+signal busy, SCK, SDA : std_logic; 
+signal test : std_logic_vector (5 downto 0); --delete
 
 
 
 begin
 
-    Sim: Loader 
-    generic map (steps => 4,
+    Sim: Loader --FrontGrande 
+    generic map (--clkfreq => 100000000,
+                 --pulselength => 1,
+                 steps => 4,
                  max => 10,
                  flashrate => 10)
-    port map (dataout => dataout,
-              clk => clk,
-              load => update,
-              print => print,
-              flash => flash,
+    port map (clk => clk,
               reset => reset,
+              load => update, --buttonin => buttonin
+              dataout => dataout,
               busy => busy,
               SCK => SCK,
               SDA => SDA,
-              test => test);
+              print => print, --delete
+              flash => flash, --delete
+              test => test); --delete
               
 end Behavioral;

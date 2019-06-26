@@ -32,18 +32,18 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity FrontGrande is
-    generic (clkfreq        : integer; --frequency of onboard clock signal in hz 
-             pulselength    : integer; --how many clk ticks do you want an output to be high for
-             steps          : integer; --how many clk ticks corresond to a SCK tick
-             max            : integer; --how many entries are in the Darray
-             flashrate      : integer); --how many clk ticks are inbetween each falsh in blinking mode
-    Port    (clk            : in std_logic;
-             reset          : in std_logic;
-             buttonin       : in std_logic;
-             dataout        : out std_logic_vector (7 downto 0);
-             busy           : out std_logic;
-             SCK            : out std_logic;
-             SDA            : out std_logic);
+    generic (clkfreq        : integer := 100000000; --frequency of onboard clock signal in hz 
+             pulselength    : integer := 1; --how many clk ticks do you want an output to be high for
+             steps          : integer := 10000000;--how many clk ticks corresond to a SCK tick --consider basing off of clkfreq
+             max            : integer := 10; --how many entries are in the Darray
+             flashrate      : integer := 1000); --how many clk ticks are inbetween each falsh in blinking mode, --consider basing off of clkfreq
+    Port    (clk            : in std_logic; --onboard clk
+             reset          : in std_logic; --reset system
+             buttonin       : in std_logic; --short press = load, long press = flash, two = print
+             dataout        : out std_logic_vector (7 downto 0); --data out from register
+             busy           : out std_logic; --indicates readout is active
+             SCK            : out std_logic; --the "effective clk" of the readout
+             SDA            : out std_logic); --value being readout at SCK
 end FrontGrande;
 
 architecture Behavioral of FrontGrande is
@@ -101,9 +101,9 @@ TB1 : TriButton --using triButton
 --                 flashrate  => flashrate)
 --    port map    (clk        => clk,
 --                 reset      => reset,
---                 load       
---                 print
---                 flash
+--                 load       => short, --moves to the next register value
+--                 print      => two, --displays the current position in the register
+--                 flash      => long, --blinks the current value
 --                 dataout    => dataout,
 --                 busy       => busy,
 --                 SCK        => SCK,
