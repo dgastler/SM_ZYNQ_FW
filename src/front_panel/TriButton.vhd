@@ -32,8 +32,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity TriButton is
-    generic (clkfreq        : integer := 100000000; --frequency of onboard clock signal in hz 
-             pulselength    : integer := 50000000); --how many clk ticks do you want an output to be high for
+    generic (clkfreq    : integer); --frequency of onboard clock signal in hz
     Port    (clk        : in std_logic;
              reset      : in std_logic;
              buttonin   : in std_logic;
@@ -46,20 +45,22 @@ architecture Behavioral of TriButton is
 
 --constants used for timing
 constant longtime   : integer := clkfreq;
-constant shorttime  : integer := (clkfreq / 2);
+constant shorttime  : integer := (clkfreq / 4);
 constant waittime   : integer := (clkfreq / 10);
 --counters
-signal count : integer range 0 to longtime;
+signal count        : integer range 0 to longtime;
+--1 bit signals
+signal twoflip      : std_logic; --to recognize a double press
+signal button       : std_logic; --clean button output from the debouncer
+
 --state machine for main process
 type states is (SM_IDLE,       --Waiting for a button press
                 SM_WAIT,    --Timing how long button is held
                 SM_READ,  --waiting for a multipress
                 SM_HOLD);  --used to buffer between button presses
 signal State : states;
---1 bit signals
-signal twoflip : std_logic; --to recognize a double press
-signal button : std_logic; --clean button output from the debouncer
---Declare Debouncer
+
+--Declare Debouncer 
 component TriDebouncer
     generic (clkfreq    : integer);
     port    (clk        : in std_logic;
@@ -126,7 +127,7 @@ StateFcn: process (clk, reset) begin
                 long <= '0';
                 two <= '0';
                 count <= count + 1;
-                if count = clkfreq / 10 then
+                if count = waittime then
                     count <= 0;
                 end if;
             
@@ -139,7 +140,6 @@ end process; --end StateFcn
 
 --This process describes the transition between states
 --An ASCII flowchart is commented into the bottom of this file
---possible failure in lagre implimentation: chage (pulslength - 1) to pulslength
 StateFlow: process (clk, reset) begin
     
     if reset = '1' then

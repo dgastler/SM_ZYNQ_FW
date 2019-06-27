@@ -32,7 +32,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity TriDebouncer is
-    generic (clkfreq    : integer := 100000000);
+    generic (clkfreq    : integer);
     Port    (clk        : in std_logic;
              reset      : in std_logic;
              buttonin   : in std_logic;
@@ -44,15 +44,16 @@ architecture Behavioral of TriDebouncer is
 --constant used for timing
 constant period : integer := clkfreq / 30;
 --counter
-signal count : integer range 0 to (period + 1);
+signal count    : integer range 0 to period;
 --1 bit signal
-signal button : std_logic; --used to buffer buttonin & buttonout
+signal button   : std_logic; --used to buffer buttonin & buttonout
 
 begin
 
+--continuous output from button
+buttonout <= button;
+
 Main: process(clk, reset) begin
-    
-    buttonout <= button;
     
     if reset = '1' then
         --everything to 0
@@ -70,8 +71,7 @@ Main: process(clk, reset) begin
         else --if the difference is rectified within timespan then reset counter
             count <= 0;
         end if;
-                
-                
+        
     end if; --end clk & reset     
 end process; --end Main
 end Behavioral;

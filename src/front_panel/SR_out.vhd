@@ -32,41 +32,38 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity SR_out is
-    generic (steps : integer := 4);
-    Port (clk       : in std_logic;
-          reset     : in std_logic;
-          datain    : in std_logic_vector (7 downto 0);
-          update    : in std_logic;
-          dataout   : out std_logic_vector (7 downto 0);         
-          busy      : out std_logic;
-          SCK       : out std_logic;
-          SDA       : out std_logic);
+    generic (steps      : integer);
+    Port    (clk        : in std_logic;
+             reset      : in std_logic;
+             datain     : in std_logic_vector (7 downto 0);
+             update     : in std_logic;
+             dataout    : out std_logic_vector (7 downto 0);         
+             busy       : out std_logic;
+             SCK        : out std_logic;
+             SDA        : out std_logic);
 end SR_out;
 
 architecture Behavioral of SR_out is
 
 --signals for outputs
-signal active : std_logic; --Buffer for busy
-signal SCK2 : std_logic; --Buffer for SCK
-
+signal active       : std_logic; --Buffer for busy
+signal SCK2         : std_logic; --Buffer for SCK
 --counters
-signal SCKcount : integer range 0 to steps; --for counting SCK incriments to steps
-signal shiftcount : unsigned (2 downto 0); --for counting the number of shifts
-
+signal SCKcount     : integer range 0 to steps; --for counting SCK incriments to steps
+signal shiftcount   : unsigned (2 downto 0); --for counting the number of shifts
 --pulses for signaling
-signal SCKpulse : std_logic; --for signaling SCK flip
-signal finish : std_logic; --for signaling that readout is done
-signal shift : std_logic; --for signaling a shift
-
+signal SCKpulse     : std_logic; --for signaling SCK flip
+signal finish       : std_logic; --for signaling that readout is done
+signal shift        : std_logic; --for signaling a shift
 --Shiftregister
-signal shiftreg : std_logic_vector (7 downto 0);
+signal shiftreg     : std_logic_vector (7 downto 0);
 
 begin
 
 --continuous assignment of outputs
-busy <= active;
-SCK <= SCk2;
-SDA <= shiftreg(7); --always MSB of shiftreg
+busy    <= active;
+SCK     <= SCk2;
+SDA     <= shiftreg(7); --always MSB of shiftreg
 
 --Process for counting and pulsing SCK
 counting: process (clk, reset)
@@ -78,16 +75,14 @@ begin
     --rising edge of clk
     elsif clk'event and clk='1' then 
         SCKpulse <= '0';
-        --if active then count
-        if active = '1' then
+        if active = '1' then --if active then count
             SCKcount <= SCKcount + 1;
             --pulse and reset count when steps reached 
-            if SCKcount = Steps - 1 then
+            if SCKcount = steps - 1 then
                 SCKpulse <= '1';
                 SCKcount <= 0;
-            end if;
-        --if not active don't count
-        else
+            end if;        
+        else --if not active don't count
             SCKcount <= 0;
         end if;
     end if;

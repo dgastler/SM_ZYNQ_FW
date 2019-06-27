@@ -17,19 +17,13 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity TopSim is
 --  Port ( );
@@ -39,7 +33,6 @@ architecture Behavioral of TopSim is
 
 component FrontGrande
 generic (clkfreq    : integer;
-         pulselength : integer;
          steps      : integer;
          max        : integer);
     Port (clk       : in std_logic;
@@ -51,7 +44,9 @@ generic (clkfreq    : integer;
           SDA       : out std_logic;
           tshort    : out std_logic;
           tlong     : out std_logic;
-          ttwo      : out std_logic);
+          ttwo      : out std_logic;
+          led3      : out std_logic;
+          led4      : out std_logic);
 end component;
 
 --inputs
@@ -60,7 +55,7 @@ signal clk, reset, buttonin : std_logic;
 signal dataout : std_logic_vector (7 downto 0);
 signal busy, SCK, SDA : std_logic; 
 --test outputs
-signal tshort, tlong, ttwo : std_logic;
+signal tshort, tlong, ttwo, led3, led4 : std_logic;
 
 
 
@@ -68,8 +63,7 @@ begin
 
 Sim: FrontGrande 
 generic map (clkfreq => 100,
-             pulselength => 1,
-             steps => 4,
+             steps => 10,
              max => 10)
 port map    (clk => clk,
              reset => reset,
@@ -80,6 +74,8 @@ port map    (clk => clk,
              SDA => SDA,
              tshort => tshort,
              tlong => tlong,
-             ttwo => ttwo);
+             ttwo => ttwo,
+             led3 => led3,
+             led4 => led4);
               
 end Behavioral;

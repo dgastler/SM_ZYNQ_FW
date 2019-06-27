@@ -17,16 +17,27 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
+library IEEE; --to use std_logic_vector for my_array package
+use IEEE.STD_LOGIC_1164.ALL;
+
+--Package for the array
+package my_array is 
+    type the_array is array(0 to 63) of std_logic_vector(7 downto 0);
+end package my_array;
+
+--Have to repeat, no clue why though
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL; -- arithmetic functions with Signed or Unsigned values
+use work.my_array.ALL;
 
 entity Loader is
-    generic (clkfreq    : integer := 100000000; --onboad clock frequency in hz
-             steps      : integer := 4; --how many clk ticks corresond to a SCK tick
-             max        : integer range 1 to 64 := 10); --how many entries are in the Darray
+    generic (clkfreq    : integer; --onboad clock frequency in hz
+             steps      : integer; --how many clk ticks corresond to a SCK tick
+             max        : integer range 1 to 64); --how many entries are in the Darray 
     Port    (clk        : in std_logic;
              reset      : in std_logic;
+             data       : in the_array;
              load       : in std_logic; --moves to the next register value
              prev       : in std_logic; --displays the current position in the register
              flash      : in std_logic; --blinks the current value
@@ -38,47 +49,28 @@ end Loader;
 
 architecture Behavioral of Loader is
 
---array of 64 8-bit registers
-type Darray is array(0 to 63) of std_logic_vector(7 downto 0);
-signal data : Darray := (
-0 => x"0A",
-1 => x"0B",
-2 => x"0C",
-3 => x"0D",
-4 => x"0E",
-5 => x"0F",
-6 => x"A0",
-7 => x"B0",
-8 => x"C0",
-9 => x"D0",
-others => x"FF"
-);
-
 --State Machine
 type states is (IDLE,   --Idle
-                  PRINT,  --Print current value
-                  BLINK); --Blink position         
+                PRINT,  --Print current value
+                BLINK); --Blink position         
 signal State : states;
-
 --register for loading data
-signal LoadData : std_logic_vector(7 downto 0);
-
+signal LoadData     : std_logic_vector(7 downto 0);
 --1-bit signals
-signal update: std_logic; --used to update
-signal active: std_logic; --used to buffer busy output, never assign directly to this
-signal flashbit: std_logic; --used for flashing data or 0
-
+signal update       : std_logic; --used to update
+signal active       : std_logic; --used to buffer busy output, never assign directly to this
+signal flashbit     : std_logic; --used for flashing data or 0
 --counters
-signal position: unsigned (5 downto 0); --to count position in register
-signal count : integer range 0 to clkfreq;
-
+signal position     : unsigned (5 downto 0); --to count position in register
+signal count        : integer range 0 to clkfreq; --for general purpose counting
+signal flashcount   : unsigned (2 downto 0); --to count the amount of times flashed
 --constants for timing
-signal refresh : integer := (clkfreq / 10); --1/10th of a second
-signal flashrate : integer := (clkfreq / 2); --half a second
+signal refresh      : integer := (clkfreq / 100); --refresh every 10 ms, 1/10th works
+signal flashrate    : integer := (clkfreq / 2); --half a second
 
 --Declare SR_out
 component SR_out
-    generic (steps : integer);
+    generic (steps  : integer);
     Port (clk       : in std_logic;
           reset     : in std_logic;
           datain    : in std_logic_vector (7 downto 0);
@@ -87,21 +79,20 @@ component SR_out
           busy      : out std_logic;
           SCK       : out std_logic;
           SDA       : out std_logic);
-end component;
+end component; --end SR_out
 
 begin
 
---using SR_out
-U1 : SR_out
-    generic map (steps => 4)
-    port map (clk => clk,
-              reset => reset,
-              datain => LoadData,
-              update => update,
-              dataout => dataout,
-              busy => active,
-              SCK => SCK,
-              SDA => SDA);
+U1 : SR_out --using SR_out
+    generic map (steps      => steps)
+    port map    (clk        => clk,
+                 reset      => reset,
+                 datain     => LoadData,
+                 update     => update,
+                 dataout    => dataout,
+                 busy       => active,
+                 SCK        => SCK,
+                 SDA        => SDA);
               
 --continuous assignment of outputs
 busy <= active;
@@ -142,8 +133,9 @@ begin
     --set signals low
     flashbit <= '0';
     update <= '0';
-    --reset count
+    --reset counters
     count <= 0;
+    flashcount <= "000";
     
   elsif clk'event and clk='1' then
     --state machine
@@ -153,6 +145,7 @@ begin
           --reset count if moving to BLINK b/c flash is high
           count <= 0;
           flashbit <= '0';
+          flashcount <= "000";
         else --if not going to BLINK
           --increment count
           count <= count + 1;
@@ -168,25 +161,30 @@ begin
         count <= 0;
         
       when BLINK =>
+
         if active = '1' then
-          update <= '0'; --set update low
+            update <= '0';
         else
-          if flash <= '0' then
-            count <= 0; --if not in 
-          else
             count <= count + 1;
             if count = flashrate then
-              count <= 0; --reset count
-              flashbit <= not flashbit; --flip flashbit
-              if flashbit = '1' then --load position
-                loaddata <= "00" & std_logic_vector(position);
-                update <= '1';
-              else --load 0
-                loaddata <= X"00";
-                update <= '1';
-              end if;
+                count <= 0;
+                flashcount <= flashcount + 1;
+                if flashcount = 0 then   --all 1's first flash
+                    loaddata <= X"FF";
+                    update <= '1';
+                elsif flashcount = 6 then
+                    loaddata <= X"FF";
+                    update <= '1';
+                elsif flashbit = '1' then --if flashbit = "1' then
+                    loaddata <= "00" & std_logic_vector(position);
+                    update <= '1';
+                    flashbit <= not flashbit;
+                else
+                    loaddata <= X"00";
+                    update <= '1';
+                    flashbit <= not flashbit;
+                end if;
             end if;
-          end if;
         end if;
   
       when others =>
@@ -196,6 +194,7 @@ begin
   end if; --end clk & reset
 end process; --end StateFcn3
 
+--This process is for the transitions between states
 StateFlow3: process (clk, reset)
 begin
 
@@ -222,10 +221,10 @@ begin
         end if;
 
       when BLINK =>
-        --return to IDLE when flash is turned off
-        if flash = '0' then
-          state <= IDLE;
+        if flashcount = 7 then
+            State <= IDLE;
         end if;
+        
 
       when others => --if broken, go to IDLE
         State <= IDLE;
