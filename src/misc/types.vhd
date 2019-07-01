@@ -5,10 +5,10 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+--use ieee.std_logic_unsigned.all;
+--use ieee.std_logic_arith.all;
 
-package types is
-
-  
+package types is  
   subtype slv_2_t is std_logic_vector(1 downto 0);
   subtype slv_3_t is std_logic_vector(2 downto 0);
   subtype slv_4_t is std_logic_vector(3 downto 0);
@@ -40,4 +40,22 @@ package types is
 
 end package types;
 
+package body types is
+
+  function log2 (val: INTEGER) return natural is
+    variable res : natural;
+  begin
+    for i in 0 to 31 loop
+      if (val <= (2**i)) then
+        res := i;
+        exit;
+      end if;
+    end loop;
+    return res;
+  end function Log2;
+
               
+  
+
+end package body types;
+

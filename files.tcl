@@ -9,6 +9,9 @@ set bd_files "\
 set vhdl_files "\
      src/top.vhd \
      src/misc/types.vhd \
+     src/misc/uart.vhd \
+     src/misc/uart_rx6.vhd \
+     src/misc/uart_tx6.vhd \
      src/misc/asym_dualport_ram.vhd \
      src/axiReg/axiRegPkg.vhd \
      src/axiReg/axiReg.vhd \

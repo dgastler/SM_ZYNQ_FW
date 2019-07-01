@@ -456,12 +456,12 @@ begin  -- architecture structure
       tap_tdo_1                 => XVC1_tdo,
       tap_tms_1                 => XVC1_tms,
 
-      CM1_UART_rx               => CM1_UART_rx,
-      CM1_UART_tx               => CM1_UART_tx_internal,
-      CM2_UART_rx               => CM2_UART_rx,
-      CM2_UART_tx               => CM2_UART_tx_internal,
-      ESM_UART_rx               => ESM_UART_rx,
-      ESM_UART_tx               => ESM_UART_tx,
+      CM1_UART_rxd               => CM1_UART_rx,
+      CM1_UART_txd               => CM1_UART_tx_internal,
+      CM2_UART_rxd               => CM2_UART_rx,
+      CM2_UART_txd               => CM2_UART_tx_internal,
+--      ESM_UART_rxd               => ESM_UART_rx,
+--      ESM_UART_txd               => ESM_UART_tx,
 
 
 --
@@ -806,7 +806,9 @@ begin  -- architecture structure
       FP_LED_SDA      => FP_LED_SDA,
       FP_switch       => FP_switch,
       ESM_LED_CLK     => ESM_LED_CLK,
-      ESM_LED_SDA     => ESM_LED_SDA);
+      ESM_LED_SDA     => ESM_LED_SDA,
+      ESM_UART_Tx     => ESM_UART_Tx,
+      ESM_UART_Rx     => ESM_UART_Rx);
 
   IPMC_i2c_slave_1: entity work.IPMC_i2c_slave
     port map (

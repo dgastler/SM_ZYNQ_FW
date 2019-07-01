@@ -5,6 +5,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_arith.all;
+
+--use work.types.all;
+
 entity asym_ram_tdp is
   generic (
     WIDTHA : integer := 4;
@@ -57,6 +60,8 @@ architecture behavioral of asym_ram_tdp is
     end loop;
     return res;
   end function Log2;
+
+
   constant minWIDTH : integer := min(WIDTHA,WIDTHB);
   constant maxWIDTH : integer := max(WIDTHA,WIDTHB);
   constant maxSIZE : integer := max(SIZEA,SIZEB);

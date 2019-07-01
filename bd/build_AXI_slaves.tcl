@@ -13,14 +13,14 @@ proc ADD_AXI_SLAVES { } {
     [AXI_DEVICE_ADD SLAVE_I2C M04 PL_CLK PL_RESET_N 50000000]
     [AXI_DEVICE_ADD CM M05 PL_CLK PL_RESET_N 50000000]
 
-    [AXI_DEVICE_ADD ESM_UART     axi_interconnect_0/M06_AXI axi_interconnect_0/M06_ACLK axi_interconnect_0/M06_ARESETN 50000000]
-    [AXI_DEVICE_ADD CM1_UART     axi_interconnect_0/M07_AXI axi_interconnect_0/M07_ACLK axi_interconnect_0/M07_ARESETN 50000000]
-    [AXI_DEVICE_ADD CM2_UART     axi_interconnect_0/M08_AXI axi_interconnect_0/M08_ACLK axi_interconnect_0/M08_ARESETN 50000000]    
+#    [AXI_DEVICE_ADD ESM_UART     axi_interconnect_0/M06_AXI axi_interconnect_0/M06_ACLK axi_interconnect_0/M06_ARESETN 50000000]
+    [AXI_DEVICE_ADD CM1_UART     axi_interconnect_0/M06_AXI axi_interconnect_0/M06_ACLK axi_interconnect_0/M06_ARESETN 50000000]
+    [AXI_DEVICE_ADD CM2_UART     axi_interconnect_0/M07_AXI axi_interconnect_0/M07_ACLK axi_interconnect_0/M07_ARESETN 50000000]    
     
-    [AXI_DEVICE_ADD C2C1    axi_interconnect_0/M09_AXI axi_interconnect_0/M09_ACLK axi_interconnect_0/M09_ARESETN 50000000]    
+    [AXI_DEVICE_ADD C2C1    axi_interconnect_0/M08_AXI axi_interconnect_0/M08_ACLK axi_interconnect_0/M08_ARESETN 50000000]    
 #    [AXI_DEVICE_ADD C2C2    axi_interconnect_0/M03_AXI axi_interconnect_0/M03_ACLK axi_interconnect_0/M03_ARESETN 50000000]
 #
-    [AXI_DEVICE_ADD C2C1_GT M10 PL_CLK PL_RESET_N 50000000] 
+    [AXI_DEVICE_ADD C2C1_GT M09 PL_CLK PL_RESET_N 50000000] 
 }
 
 proc CONFIGURE_AXI_SLAVES { } {
@@ -49,11 +49,11 @@ proc CONFIGURE_AXI_SLAVES { } {
     [AXI_IP_XVC XVC2]
 
 
-    #========================================
-    #  Ethernet switch UART
-    #========================================
-    puts "Adding Xilix UART for ESM"
-    [AXI_IP_UART ESM_UART 115200]
+##    #========================================
+##    #  Ethernet switch UART
+##    #========================================
+##    puts "Adding Xilix UART for ESM"
+##    [AXI_IP_UART ESM_UART 115200]
     #========================================
     #  Command module 1 UART
     #========================================
@@ -201,8 +201,9 @@ proc AXI_IP_UART {device_name baud_rate} {
 
     
     #generate ports for the JTAG signals
-    make_bd_pins_external  -name ${device_name}_rx [get_bd_pins $device_name/rx]
-    make_bd_pins_external  -name ${device_name}_tx [get_bd_pins $device_name/tx]
+    make_bd_intf_pins_external  -name ${device_name} [get_bd_intf_pins $device_name/UART]
+#    make_bd_pins_external  -name ${device_name}_rx [get_bd_pins $device_name/rx]
+#    make_bd_pins_external  -name ${device_name}_tx [get_bd_pins $device_name/tx]
 
     
     #build the DTSI chunk for this device to be a UIO

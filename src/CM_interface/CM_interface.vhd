@@ -57,6 +57,12 @@ architecture behavioral of CM_interface is
   signal CM1_disable : std_logic;
   signal CM2_disable : std_logic;
   signal overridePWRGood : std_logic_vector(1 downto 0);
+
+  signal baud_counter : unsigned(4 downto 0);
+  constant baud_counter_end : unsigned(4 downto 0) := "11010";
+  signal en_16_x_baud : std_logic;
+  signal CM1_tx : std_logic;
+  
 begin  -- architecture behavioral
 
   -------------------------------------------------------------------------------
@@ -67,7 +73,8 @@ begin  -- architecture behavioral
   CM1_UART_BUF : OBUFT
     port map (
       T => CM1_disable,
-      I => to_CM1_in.UART_Tx,
+--      I => to_CM1_in.UART_Tx,
+      I => CM1_tx,
       O => to_CM1_out.UART_Tx);
   CM1_TMS_BUF : OBUFT
     port map (
@@ -113,14 +120,41 @@ begin  -- architecture behavioral
   begin  -- process CM_powerup
       CM1_disable <= '1';
       if enableCM(0) = '1' then
-        CM1_disable <= (not from_CM1.PWR_good) or (not overridePWRGood(0));
+        CM1_disable <= (from_CM1.PWR_good and (not overridePWRGood(0)));
+--        CM1_disable <= (not from_CM1.PWR_good) and (not overridePWRGood(0));
       end if;
 
       CM2_disable <= '1';
       if enableCM(1) = '1' then
-        CM2_disable <= (not from_CM2.PWR_good) or (not overridePWRGood(1));
+        CM2_disable <= (from_CM2.PWR_good and (not overridePWRGood(1)));
+        --CM2_disable <= (not from_CM2.PWR_good) and (not overridePWRGood(1));
       end if;
   end process CM_powerup;
+
+  baud_counter_proc: process (clk_axi) is
+  begin  -- process baud_counter
+    if clk_axi'event and clk_axi = '1' then  -- rising clock edge
+      en_16_x_baud <= '0';
+      if baud_counter = baud_counter_end then
+        baud_counter <= (others => '0');
+        en_16_x_baud <= '1';
+      else
+        baud_counter <= baud_counter + 1;  
+      end if;
+      
+    end if;
+  end process baud_counter_proc;
+  uart_tx6_1: entity work.uart_tx6
+    port map (
+      data_in             => reg_data(1)(7 downto 0),
+      en_16_x_baud        => en_16_x_baud,
+      serial_out          => CM1_tx,
+      buffer_write        => reg_data(1)(8),
+      buffer_data_present => open,
+      buffer_half_full    => open,
+      buffer_full         => open,
+      buffer_reset        => '0',
+      clk                 => clk_axi);
   
   -------------------------------------------------------------------------------
   -- AXI 
@@ -176,10 +210,14 @@ begin  -- architecture behavioral
     if reset_axi_n = '0' then                 -- asynchronous reset (active high)
       reg_data <= default_reg_data;
     elsif clk_axi'event and clk_axi = '1' then  -- rising clock edge
+      reg_data(1)(8) <= '0';
       if localWrEn = '1' then
         case localAddress(3 downto 0) is
           when x"0" =>
             reg_data(0)( 3 downto  0) <= localWrData(3 downto 0);
+          when x"1" =>
+            reg_data(1)(7 downto 0) <= localWrData(7 downto 0);
+            reg_data(1)(8) <= '1';
           when others => null;
         end case;
       end if;
