@@ -6,8 +6,10 @@ LDFLAGS+=-L./
 UIO_REG=uioReg
 SI_REG=siIO
 PROG_SI=programSI5344
+ESM_UART=ESM_UART
+SENDD=sendD
 
-all:  $(UIO_REG) $(SI_REG) $(PROG_SI)
+all:  $(UIO_REG) $(SI_REG) $(PROG_SI) $(ESM_UART) $(SENDD)
 
 $(UIO_REG):	$(UIO_REG).o
 	$(CXX) $(LDFLAGS) -o $@ $^
@@ -18,12 +20,18 @@ $(SI_REG):	$(SI_REG).o i2c.o
 $(PROG_SI):	$(PROG_SI).o i2c.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
+$(ESM_UART):	$(ESM_UART).o
+	$(CXX) $(LDFLAGS) -o $@ $^
+
+$(SENDD):	$(SENDD).o
+	$(CXX) $(LDFLAGS) -o $@ $^
 
 %.o:%.cxx
 	$(CXX) -c $(CXXFLAGS) -o $@  $<
 
 clean:
 	@rm $(UIO_REG) > /dev/null 2>&1
+	@rm $(ESM_UART) > /dev/null 2>&1
 	@rm *.o > /dev/null 2>&1
 	@rm *~ > /dev/null 2>&1
 
