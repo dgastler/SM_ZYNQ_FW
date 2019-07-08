@@ -14,6 +14,7 @@ package CM_package is
 
   type from_CM_t is record
     PWR_good : std_logic;
+    UART_Rx  : std_logic;
     TDO      : std_logic;
     GPIO     : slv_3_t;
   end record from_CM_t;

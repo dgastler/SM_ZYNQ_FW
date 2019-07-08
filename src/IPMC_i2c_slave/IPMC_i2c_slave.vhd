@@ -62,7 +62,7 @@ architecture behavioral of IPMC_i2c_slave is
   signal SDA_en : std_logic;
 
   
-  
+  signal enB : std_logic;
   signal reg_data :  slv32_array_t(integer range 0 to REG32_COUNT-1);
   constant Default_reg_data : slv32_array_t(integer range 0 to REG32_COUNT-1) :=
     (0 => x"00000003",
@@ -117,6 +117,7 @@ begin  -- architecture behavioral
     end if;
   end process AXIRegProc;
 
+  enB <= localRdReq or localWrEn;
   asym_ram_tdp_1: entity work.asym_ram_tdp
     generic map (
       WIDTHB     => 32,
@@ -128,7 +129,7 @@ begin  -- architecture behavioral
     port map (
       clkA  => clk_axi,
       clkB  => clk_axi,
-      enB   => localRdReq or localWrEn,
+      enB   => enB,
       enA   => '1',
       weB   => master_i2c_dv,
       weA   => localWrEn,

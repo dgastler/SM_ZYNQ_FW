@@ -48,8 +48,8 @@ architecture behavioral of CM_interface is
   signal localRdAck   : std_logic;
   
 
-  signal reg_data :  slv32_array_t(integer range 0 to 15);
-  constant Default_reg_data : slv32_array_t(integer range 0 to 15) := (0 => x"00000000",
+  signal reg_data :  slv32_array_t(integer range 0 to 64);
+  constant Default_reg_data : slv32_array_t(integer range 0 to 64) := (0 => x"00000000",
                                                                        others => x"00000000");
 
 
@@ -58,10 +58,19 @@ architecture behavioral of CM_interface is
   signal CM2_disable : std_logic;
   signal overridePWRGood : std_logic_vector(1 downto 0);
 
-  signal baud_counter : unsigned(4 downto 0);
-  constant baud_counter_end : unsigned(4 downto 0) := "11010";
-  signal en_16_x_baud : std_logic;
-  signal CM1_tx : std_logic;
+
+  signal reset             : std_logic;                     
+  signal uart_tx           : slv_2_t;
+  signal uart_rx           : slv_2_t;
+  signal uart_wr_en        : slv_2_t;                
+  signal uart_wr_half_full : slv_2_t;         
+  signal uart_wr_full      : slv_2_t;              
+  signal uart_rd_data      : slv8_array_t(0 to 1);
+  signal uart_rd_en        : slv_2_t;                
+  signal uart_rd_available : slv_2_t;         
+  signal uart_rd_half_full : slv_2_t;         
+  signal uart_rd_full      : slv_2_t;
+
   
 begin  -- architecture behavioral
 
@@ -74,7 +83,7 @@ begin  -- architecture behavioral
     port map (
       T => CM1_disable,
 --      I => to_CM1_in.UART_Tx,
-      I => CM1_tx,
+      I => uart_tx(0),
       O => to_CM1_out.UART_Tx);
   CM1_TMS_BUF : OBUFT
     port map (
@@ -95,7 +104,7 @@ begin  -- architecture behavioral
   CM2_UART_BUF : OBUFT
     port map (
       T => CM2_disable,
-      I => to_CM2_in.UART_Tx,
+      I => uart_tx(1),
       O => to_CM2_out.UART_Tx);
   CM2_TMS_BUF : OBUFT
     port map (
@@ -131,31 +140,27 @@ begin  -- architecture behavioral
       end if;
   end process CM_powerup;
 
-  baud_counter_proc: process (clk_axi) is
-  begin  -- process baud_counter
-    if clk_axi'event and clk_axi = '1' then  -- rising clock edge
-      en_16_x_baud <= '0';
-      if baud_counter = baud_counter_end then
-        baud_counter <= (others => '0');
-        en_16_x_baud <= '1';
-      else
-        baud_counter <= baud_counter + 1;  
-      end if;
-      
-    end if;
-  end process baud_counter_proc;
-  uart_tx6_1: entity work.uart_tx6
-    port map (
-      data_in             => reg_data(1)(7 downto 0),
-      en_16_x_baud        => en_16_x_baud,
-      serial_out          => CM1_tx,
-      buffer_write        => reg_data(1)(8),
-      buffer_data_present => open,
-      buffer_half_full    => open,
-      buffer_full         => open,
-      buffer_reset        => '0',
-      clk                 => clk_axi);
-  
+
+  uart_rx <= from_CM2.UART_Rx & from_CM1.UART_Rx;
+  CM_UARTs: for iCM in 0 to 1 generate  
+    uart_CM: entity work.uart
+      generic map (
+        BAUD_COUNT => 26)
+      port map (
+        clk             => clk_axi,
+        reset           => reset,
+        tx              => uart_tx(iCM),
+        rx              => uart_rx(iCM),
+        write_data      => reg_data(iCM*16 + 16)(7 downto 0),
+        write_en        => uart_wr_en(iCM),
+        write_half_full => uart_wr_half_full(iCM),
+        write_full      => uart_wr_full(iCM),
+        read_data       => uart_rd_data(iCM),
+        read_en         => uart_rd_en(iCM),
+        read_available  => uart_rd_available(iCM),
+        read_half_full  => uart_rd_half_full(iCM),
+        read_full       => uart_rd_full(iCM));             
+  end generate CM_UARTs;
   -------------------------------------------------------------------------------
   -- AXI 
   -------------------------------------------------------------------------------
@@ -198,7 +203,24 @@ begin  -- architecture behavioral
           localRdData( 3 downto  0) <= reg_data(0)( 3 downto  0);
           localRdData( 4) <= not CM1_disable;  -- CM1 outputs enabled
           localRdData( 5) <= not CM2_disable;  -- CM2 outputs enabled
-
+        when x"10" =>
+          localRdData( 7 downto  0) <= reg_data(16)( 7 downto  0);
+          localRdData(13) <= uart_wr_half_full(0);
+          localRdData(14) <= uart_wr_full(0);
+        when x"11" =>
+          localRdData( 7 downto  0) <= uart_rd_data(0);
+          localRdData(12) <= uart_rd_available(0);
+          localRdData(13) <= uart_rd_half_full(0);
+          localRdData(14) <= uart_rd_full(0);
+        when x"20" =>
+          localRdData( 7 downto  0) <= reg_data(32)( 7 downto  0);
+          localRdData(13) <= uart_wr_half_full(1);
+          localRdData(14) <= uart_wr_full(1);
+        when x"21" =>
+          localRdData( 7 downto  0) <= uart_rd_data(1);
+          localRdData(12) <= uart_rd_available(1);
+          localRdData(13) <= uart_rd_half_full(1);
+          localRdData(14) <= uart_rd_full(1);
         when others =>
           localRdData <= x"00000000";
       end case;
@@ -210,14 +232,22 @@ begin  -- architecture behavioral
     if reset_axi_n = '0' then                 -- asynchronous reset (active high)
       reg_data <= default_reg_data;
     elsif clk_axi'event and clk_axi = '1' then  -- rising clock edge
-      reg_data(1)(8) <= '0';
+      uart_wr_en <= (others => '0');
+      uart_rd_en <= (others => '0');
       if localWrEn = '1' then
         case localAddress(3 downto 0) is
           when x"0" =>
             reg_data(0)( 3 downto  0) <= localWrData(3 downto 0);
-          when x"1" =>
-            reg_data(1)(7 downto 0) <= localWrData(7 downto 0);
-            reg_data(1)(8) <= '1';
+          when x"10" =>
+            reg_data(16)(7 downto 0) <= localWrData(7 downto 0);
+            uart_wr_en(0) <= '1';
+          when x"11" =>
+            uart_rd_en(0) <= '1';
+          when x"20" =>
+            reg_data(16)(7 downto 0) <= localWrData(7 downto 0);
+            uart_wr_en(0) <= '1';
+          when x"21" =>
+            uart_rd_en(0) <= '1';
           when others => null;
         end case;
       end if;
