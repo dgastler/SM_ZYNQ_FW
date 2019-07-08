@@ -19,17 +19,7 @@
 ----------------------------------------------------------------------------------
 library IEEE; --to use std_logic_vector for my_array package
 use IEEE.STD_LOGIC_1164.ALL;
-
---Package for the array
-package my_array is 
-    type the_array is array(0 to 63) of std_logic_vector(7 downto 0);
-end package my_array;
-
---Have to repeat, no clue why though
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL; -- arithmetic functions with Signed or Unsigned values
-use work.my_array.ALL;
+use IEEE.NUMERIC_STD.ALL;
 use work.types.ALL;
 
 entity LED_Encoder is
@@ -38,7 +28,7 @@ entity LED_Encoder is
              REG_COUNT  : integer range 1 to 64); --how many entries are in the Darray 
     Port    (clk        : in std_logic;
              reset      : in std_logic;
-             data       : in the_array;
+             data       : in slv8_array_t(0 to (REG_COUNT - 1));
              load       : in std_logic; --moves to the next register value
              prev       : in std_logic; --displays the current position in the register
              flash      : in std_logic; --blinks the current value
