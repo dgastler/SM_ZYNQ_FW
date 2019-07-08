@@ -44,9 +44,7 @@ generic (clkfreq    : integer;
           SDA       : out std_logic;
           tshort    : out std_logic;
           tlong     : out std_logic;
-          ttwo      : out std_logic;
-          led3      : out std_logic;
-          led4      : out std_logic);
+          ttwo      : out std_logic);
 end component;
 
 --inputs
@@ -55,7 +53,7 @@ signal clk, reset, buttonin : std_logic;
 signal dataout : std_logic_vector (7 downto 0);
 signal busy, SCK, SDA : std_logic; 
 --test outputs
-signal tshort, tlong, ttwo, led3, led4 : std_logic;
+signal tshort, tlong, ttwo : std_logic;
 
 
 
@@ -74,8 +72,6 @@ port map    (clk => clk,
              SDA => SDA,
              tshort => tshort,
              tlong => tlong,
-             ttwo => ttwo,
-             led3 => led3,
-             led4 => led4);
+             ttwo => ttwo);
               
 end Behavioral;
