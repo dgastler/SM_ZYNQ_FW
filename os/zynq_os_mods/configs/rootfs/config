@@ -432,7 +432,6 @@ CONFIG_canutils=y
 # ethtool 
 #
 CONFIG_ethtool=y
-# CONFIG_ethtool is not set
 # CONFIG_ethtool-dbg is not set
 # CONFIG_ethtool-dev is not set
 
@@ -454,7 +453,6 @@ CONFIG_ethtool=y
 # minicom 
 #
 CONFIG_minicom=y
-# CONFIG_minicom is not set
 # CONFIG_minicom-dbg is not set
 # CONFIG_minicom-dev is not set
 
@@ -728,7 +726,7 @@ CONFIG_pciutils=y
 #
 # screen 
 #
-# CONFIG_screen is not set
+CONFIG_screen=y
 # CONFIG_screen-dbg is not set
 # CONFIG_screen-dev is not set
 
@@ -742,7 +740,7 @@ CONFIG_pciutils=y
 #
 # setserial 
 #
-# CONFIG_setserial is not set
+CONFIG_setserial=y
 # CONFIG_setserial-dev is not set
 # CONFIG_setserial-dbg is not set
 
@@ -4132,10 +4130,10 @@ CONFIG_tcpdump=y
 #
 # apps 
 #
-# CONFIG_bootscript is not set
+CONFIG_bootscript=y
 # CONFIG_gpio-demo is not set
 # CONFIG_peekpoke is not set
-# CONFIG_startup-script is not set
+CONFIG_startup-script=y
 
 #
 # user packages 
