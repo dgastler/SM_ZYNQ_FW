@@ -38,26 +38,31 @@ entity Button_Decoder is
              buttonin   : in std_logic;
              short      : out std_logic;
              long       : out std_logic;
-             two        : out std_logic);
+             two        : out std_logic;
+             shutdown   : out std_logic);
 end Button_Decoder;
 
 architecture Behavioral of Button_Decoder is
 
 --constants used for timing
-constant longtime   : integer := CLKFREQ;
-constant shorttime  : integer := (CLKFREQ / 6);
-constant waittime   : integer := (CLKFREQ / 10);
+constant longtime       : integer := CLKFREQ;
+constant shorttime      : integer := (CLKFREQ / 6);
+constant waittime       : integer := (CLKFREQ / 10);
 --counters
-signal count        : integer range 0 to longtime;
+signal count            : integer range 0 to longtime;
+signal shutdowncount    : integer range 0 to longtime;
+signal shutdownshift    : unsigned (2 downto 0);
 --1 bit signals
-signal twoflip      : std_logic; --to recognize a double press
-signal button       : std_logic; --clean button output from the debouncer
+signal twoflip          : std_logic; --to recognize a double press
+signal button           : std_logic; --clean button output from the debouncer
+signal forcestop        : std_logic; --signal to go to shutdown state
 
 --state machine for main process
 type states is (SM_IDLE,       --Waiting for a button press
                 SM_WAIT,    --Timing how long button is held
                 SM_READ,  --waiting for a multipress
-                SM_HOLD);  --used to buffer between button presses
+                SM_HOLD,
+                SM_SHUTDOWN);  --used to buffer between button presses
 signal State : states;
 
 --Declare Debouncer 
@@ -82,9 +87,10 @@ port map    (clk        => clk,
 StateFcn: process (clk, reset) begin
 
     if reset = '1' then  
-        --state going to idle because a reset is an effecive reset
+        --going to idle is an effective reset
+        
     elsif clk'event and clk='1' then
-    
+
         case State is
         
             when SM_IDLE =>
@@ -94,6 +100,7 @@ StateFcn: process (clk, reset) begin
                 short <= '0';
                 long <= '0';
                 two <= '0';
+                shutdown <= '0';
                 --twoflip is 0;
                 twoflip <= '0';
                 
@@ -130,7 +137,10 @@ StateFcn: process (clk, reset) begin
                 if count = waittime then
                     count <= 0;
                 end if;
-            
+                
+            when SM_SHUTDOWN =>
+                shutdown <= '1';
+                
             when others => null;
         end case; --end state machine
     
@@ -151,14 +161,18 @@ StateFlow: process (clk, reset) begin
         case State is 
         
             when SM_IDLE =>
-                if button = '1' then
+                if forcestop = '1' then
+                    State <= SM_SHUTDOWN;
+                elsif button = '1' then
                     State <= SM_WAIT;
                 else   
                     State <= SM_IDLE;
-                end if;
+                end if;   
                 
             when SM_WAIT =>
-                if button = '1' then
+                if forcestop = '1' then
+                    State <= SM_SHUTDOWN;      
+                elsif button = '1' then
                     if count = longtime then
                         State <= SM_HOLD;
                     end if;
@@ -167,15 +181,23 @@ StateFlow: process (clk, reset) begin
                 end if;
             
             when SM_READ =>
-                if count = shorttime then
+                if forcestop = '1' then
+                    State <= SM_SHUTDOWN;
+                elsif count = shorttime then
                     State <= SM_HOLD;
                 end if;
                 
                 
             when SM_HOLD =>
-                if count = waittime  then
+                if forcestop = '1' then
+                    State <= SM_SHUTDOWN;                    
+                elsif count = waittime  then
                     State <= SM_IDLE;
-                end if;                            
+                end if;
+                
+            when SM_SHUTDOWN =>
+                null; --only way to leave shutdown is a reset
+            
             when others => 
                 State <= SM_IDLE;
         end case; --end state machine
@@ -183,6 +205,39 @@ StateFlow: process (clk, reset) begin
     
     end if; --end clk & reset
 end process; --end StateFlow
+
+
+STOP: process (clk, reset)
+begin
+    if reset = '1' then
+        shutdowncount <= 0;
+        shutdownshift <= "000";
+        
+    elsif clk'event and clk='1' then
+        
+        if State = SM_SHUTDOWN then
+            forcestop <= '0';
+            shutdowncount <= 0;
+            shutdownshift <= "000";
+            
+        elsif button = '1' then
+            shutdowncount <= shutdowncount + 1;
+            if shutdowncount = longtime then
+                shutdowncount <= 0;
+                shutdownshift <= shutdownshift + 1;
+                if shutdownshift = "111" then
+                    forcestop <= '1';
+                    shutdownshift <= "000";
+                end if;
+            end if;
+        else
+            shutdowncount <= 0;
+            shutdownshift <= "000";
+        end if;
+    end if; --end clk & reset
+    
+end process; --end STOP process
+    
 end Behavioral;
 
                             

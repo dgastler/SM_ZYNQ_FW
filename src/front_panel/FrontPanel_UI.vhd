@@ -28,7 +28,7 @@ end package my_array;
 library IEEE; --Have to repeat, no clue why though
 use IEEE.STD_LOGIC_1164.ALL;
 use work.my_array.ALL;
-
+use work.types.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
@@ -40,29 +40,29 @@ entity FrontPanel_UI is
     Port    (clk            : in std_logic; --onboard clk
              reset          : in std_logic; --reset system
              buttonin       : in std_logic; --short press = load, long press = flash, two = print
-             --display_regs   : in slv8_array_t(0 to REG_COUNT-1) := (others => x"00");
+             display_regs   : in slv8_array_t(0 to (REG_COUNT - 1)) := (others => x"00");
              LEDout         : out std_logic_vector (7 downto 0); --data out from register
-             busy           : out std_logic; --indicates readout is active
-             SCK            : out std_logic; --the "effective clk" of the readout
-             SDA            : out std_logic;--); --value being readout at SCK
              --for testing, delete all ports below this line
              tshort         : out std_logic;
              tlong          : out std_logic;
-             ttwo           : out std_logic);
+             ttwo           : out std_logic;
+             tshutdown      : out std_logic);
 end FrontPanel_UI;
 
 architecture Behavioral of FrontPanel_UI is
 
 --signals for transmisitting across components
-signal short    : std_logic;
+signal short    : std_logic; 
 signal long     : std_logic;
 signal two      : std_logic;
+signal shutdown : std_logic;
+signal LEDreset : std_logic;
+signal SCK      : std_logic;
+signal SDA      : std_logic;
 --shift reg for readout
 signal shiftreg : std_logic_vector (7 downto 0);
 --1 bit logic
 signal shifty   : std_logic; --used for shifting shiftreg
-signal SCK2     : std_logic; --used to buffer SCK
-signal SDA2     : std_logic; --used to buffer SDA
 --constants for timing
 constant steps  : integer := CLKFREQ / 1000000; --this makes SCK run at 1 Mhz, 10 us for a full readout, --2 does work
 --kinda a placeholder, may go away
@@ -92,7 +92,8 @@ component Button_Decoder
              buttonin   : in std_logic;
              short      : out std_logic;
              long       : out std_logic;
-             two        : out std_logic);
+             two        : out std_logic;
+             shutdown   : out std_logic);
 end component; --end TriButton
 
 --Declare LED_Encoder
@@ -107,7 +108,6 @@ component LED_Encoder
              prev       : in std_logic;
              flash      : in std_logic;
              dataout    : out std_logic_vector (7 downto 0);
-             busy       : out std_logic;
              SCK        : out std_logic;
              SDA        : out std_logic);
 end component; --end LED_Encoder
@@ -121,27 +121,27 @@ TB1 : Button_Decoder --using triButton
                  buttonin   => buttonin,
                  short      => short,
                  long       => long,
-                 two        => two);
+                 two        => two,
+                 shutdown   => shutdown);
                                 
 L1 : LED_Encoder --using LED_Encoder
     generic map (CLKFREQ    => CLKFREQ,
                  STEPS      => STEPS,
                  REG_COUNT  => REG_COUNT)
     port map    (clk        => clk,
-                 reset      => reset,
+                 reset      => LEDreset,
                  data       => data,
                  load       => short,--short, --moves to the next register value
                  prev       => two,--two --displays the current position in the register
                  flash      => long, --long --blinks the current value
                  dataout    => dataout,
-                 busy       => busy,
-                 SCK        => SCK2,
-                 SDA        => SDA2);
+                 SCK        => SCK,
+                 SDA        => SDA);
                    
---continuout
+--continuous output
 LEDout <= shiftreg(0) & shiftreg(1) & shiftreg(2) & shiftreg(3) & shiftreg(4) & shiftreg(5) & shiftreg(6) & shiftreg(7);
-SCK <= SCK2;
-SDA <= SDA2;
+--reset for LED includes shutdown signal
+LEDreset <= shutdown or reset;
                    
 Shifting : process (clk, reset)
 begin
@@ -149,9 +149,9 @@ begin
         shifty <= '0';
         shiftreg <= X"00";
     elsif clk'event and clk='1' then
-        if SCK2 = '1' then
+        if SCK = '1' then
             if shifty = '1' then
-                shiftreg <= SDA2 & shiftreg (7 downto 1);
+                shiftreg <= SDA & shiftreg (7 downto 1);
                 shifty <= '0';
             end if;  
         else
@@ -181,7 +181,11 @@ begin
             elsif two = '1' then
                 ttwo <= '1';
                 hold <= '1';
+            elsif shutdown = '1' then
+                tshutdown <= '1';
+                hold <= '1';
             else
+                tshutdown <= '0';
                 tshort <= '0';
                 tlong <= '0';
                 ttwo <= '0';

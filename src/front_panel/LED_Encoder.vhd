@@ -30,6 +30,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL; -- arithmetic functions with Signed or Unsigned values
 use work.my_array.ALL;
+use work.types.ALL;
 
 entity LED_Encoder is
     generic (CLKFREQ     : integer; --onboad clock frequency in hz
@@ -42,7 +43,6 @@ entity LED_Encoder is
              prev       : in std_logic; --displays the current position in the register
              flash      : in std_logic; --blinks the current value
              dataout    : out std_logic_vector (7 downto 0);
-             busy       : out std_logic;
              SCK        : out std_logic;
              SDA        : out std_logic);
 end LED_Encoder;
@@ -96,7 +96,7 @@ U1 : SR_Out --using SR_Out
                  SDA        => SDA);
               
 --continuous assignment of outputs
-busy <= active;
+--busy <= active;
 
 --This process manages the position within the register
 Shift: process (clk, reset)
