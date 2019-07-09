@@ -19,29 +19,25 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.types.ALL;
 use IEEE.NUMERIC_STD.ALL;
-
+use work.types.ALL;
 
 entity FrontPanel_UI is
     generic (CLKFREQ        : integer := 100000000;         --frequency of onboard clock signal in hz 
              REG_COUNT      : integer range 1 to 64 := 14;  --how many entries are in the array
              FLASHLENGTH    : integer := 3;                 --how many seconds do you want it to flash for
-             FLASHRATE      : integer := 2);                --how many times do you want it to flash per second
-    Port    (clk            : in std_logic;                 --onboard clk
-             reset          : in std_logic;                 --reset system
-             buttonin       : in std_logic;                 --button input
-             addressin        : in unsigned (5 downto 0);  --address input
-             force_address    : in std_logic; --forces the input address onto the LED_Encoder
-             display_regs   : in slv8_array_t(0 to (REG_COUNT - 1));-- := (others => x"00");
-             addressout        : out unsigned (5 downto 0);    --The address in the display_regs currently being displayed
-             SCK            : out std_logic;                --serial clk
-             SDA            : out std_logic;                --serial data
-             --outputs from buttonin
-             --shortout       : out std_logic;
-             --longout        : out std_logic;
-             --twoout         : out std_logic;
-             shutdownout    : out std_logic);
+             FLASHRATE      : integer := 2;                 --how many times do you want it to flash per second
+             SHUTDOWNFLIP   : std_logic := '1');            --if 1 flash AA-55, if 0 go to reg0
+    Port    (clk            : in std_logic;                             --onboard clk
+             reset          : in std_logic;                             --reset system
+             buttonin       : in std_logic;                             --button input
+             addressin        : in unsigned (5 downto 0);               --address input
+             force_address    : in std_logic;                           --forces the input address onto the LED_Encoder
+             display_regs   : in slv8_array_t(0 to (REG_COUNT - 1));    -- := (others => x"00");
+             addressout        : out unsigned (5 downto 0);             --The address in the display_regs currently being displayed
+             SCK            : out std_logic;                            --serial clk
+             SDA            : out std_logic;                            --serial data
+             shutdownout    : out std_logic);                           --shutdown signal            
 end FrontPanel_UI;
 
 architecture Behavioral of FrontPanel_UI is
@@ -74,7 +70,8 @@ component LED_Encoder
              STEPS          : integer;
              REG_COUNT      : integer range 1 to 64;
              FLASHLENGTH    : integer;
-             FLASHRATE      : integer);
+             FLASHRATE      : integer;
+             SHUTDOWNFLIP   : std_logic);
     port    (clk            : in std_logic;
              reset          : in std_logic;
              addressin      : in unsigned (5 downto 0); 
@@ -83,6 +80,7 @@ component LED_Encoder
              load           : in std_logic;
              prev           : in std_logic;
              flash          : in std_logic;
+             shutdown       : in std_logic;
              dataout        : out std_logic_vector (7 downto 0);
              addressout     : out unsigned (5 downto 0);
              SCK            : out std_logic;
@@ -106,7 +104,8 @@ L1 : LED_Encoder --using LED_Encoder
                  STEPS          => STEPS,
                  REG_COUNT      => REG_COUNT,
                  FLASHLENGTH    => FLASHLENGTH,
-                 FLASHRATE      => FLASHRATE)
+                 FLASHRATE      => FLASHRATE,
+                 SHUTDOWNFLIP   => SHUTDOWNFLIP)
     port map    (clk            => clk,
                  reset          => reset,
                  addressin      => addressin,
@@ -115,15 +114,13 @@ L1 : LED_Encoder --using LED_Encoder
                  load           => short,
                  prev           => two,
                  flash          => long,
+                 shutdown       => shutdown,
                  dataout        => dataout,
                  addressout     => addressout,
                  SCK            => SCK,
                  SDA            => SDA);
 
 --continuous button outputs                   
---shortout <= short;
---longout <= long;
---twoout <= two;
 shutdownout <= shutdown;
 
 end Behavioral;

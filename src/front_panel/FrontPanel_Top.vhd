@@ -19,8 +19,8 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.types.ALL;
 use IEEE.NUMERIC_STD.ALL; 
+use work.types.ALL;
 
 entity FrontPanel_Top is
     port    (clk            : in std_logic;
@@ -41,7 +41,6 @@ signal short    : std_logic;
 signal long     : std_logic;
 signal two      : std_logic;
 signal shutdown : std_logic;
-signal LEDreset : std_logic;
 signal SCK2      : std_logic;
 signal SDA2      : std_logic;
 --shift reg for readout
@@ -74,7 +73,8 @@ component FrontPanel_UI
     generic (CLKFREQ        : integer;
              REG_COUNT      : integer;
              FLASHLENGTH    : integer;
-             FLASHRATE      : integer);
+             FLASHRATE      : integer;
+             SHUTDOWNFLIP   : std_logic);
     port    (clk            : in std_logic;
              reset          : in std_logic;
              buttonin       : in std_logic;
@@ -95,16 +95,15 @@ begin
 
 --continuous output
 LEDout <= shiftreg(0) & shiftreg(1) & shiftreg(2) & shiftreg(3) & shiftreg(4) & shiftreg(5) & shiftreg(6) & shiftreg(7);
---reset for LED includes shutdown signal
-LEDreset <= shutdown or reset;
 
 display_regs(4) <= reg4;
 
 F1: FrontPanel_UI
     generic map (CLKFREQ        => 100000000,
                  REG_COUNT      => 14,
-                FLASHLENGTH     => 3,
-                 FLASHRATE      => 2)
+                 FLASHLENGTH    => 3,
+                 FLASHRATE      => 2,
+                 SHUTDOWNFLIP   => '1')
     port map    (clk            => clk,
                  reset          => reset,
                  buttonin       => buttonin,
