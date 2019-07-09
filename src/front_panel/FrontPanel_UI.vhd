@@ -17,31 +17,30 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
-library IEEE; --Have to repeat, no clue why though
+library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.types.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL; --del
+use IEEE.NUMERIC_STD.ALL;
 
 
 entity FrontPanel_UI is
-    generic (CLKFREQ        : integer := 100000000; --frequency of onboard clock signal in hz 
-             REG_COUNT      : integer range 1 to 64 := 10;  --how many entries are in the Darray
-             FLASHLENGTH    : integer := 0;
-             FLASHRATE      : integer := 0);
-    Port    (clk            : in std_logic; --onboard clk
-             reset          : in std_logic; --reset system
-             buttonin       : in std_logic;
+    generic (CLKFREQ        : integer := 100000000;         --frequency of onboard clock signal in hz 
+             REG_COUNT      : integer range 1 to 64 := 14;  --how many entries are in the array
+             FLASHLENGTH    : integer := 3;                 --how many seconds do you want it to flash for
+             FLASHRATE      : integer := 2);                --how many times do you want it to flash per second
+    Port    (clk            : in std_logic;                 --onboard clk
+             reset          : in std_logic;                 --reset system
+             buttonin       : in std_logic;                 --button input
+             addressin        : in unsigned (5 downto 0);  --address input
+             force_address    : in std_logic; --forces the input address onto the LED_Encoder
              display_regs   : in slv8_array_t(0 to (REG_COUNT - 1));-- := (others => x"00");
-             SCK            : out std_logic;
-             SDA            : out std_logic;
+             addressout        : out unsigned (5 downto 0);    --The address in the display_regs currently being displayed
+             SCK            : out std_logic;                --serial clk
+             SDA            : out std_logic;                --serial data
              --outputs from buttonin
-             shortout       : out std_logic;
-             longout        : out std_logic;
-             twoout         : out std_logic;
+             --shortout       : out std_logic;
+             --longout        : out std_logic;
+             --twoout         : out std_logic;
              shutdownout    : out std_logic);
 end FrontPanel_UI;
 
@@ -59,65 +58,72 @@ signal dataout : std_logic_vector (7 downto 0);
 
 --Declare TriButton
 component Button_Decoder
-    generic (CLKFREQ    : integer);
-    port    (clk        : in std_logic;
-             reset      : in std_logic;
-             buttonin   : in std_logic;
-             short      : out std_logic;
-             long       : out std_logic;
-             two        : out std_logic;
-             shutdown   : out std_logic);
+    generic (CLKFREQ        : integer);
+    port    (clk            : in std_logic;
+             reset          : in std_logic;
+             buttonin       : in std_logic;
+             short          : out std_logic;
+             long           : out std_logic;
+             two            : out std_logic;
+             shutdown       : out std_logic);
 end component; --end TriButton
 
 --Declare LED_Encoder
 component LED_Encoder
-    generic (CLKFREQ    : integer;
-             STEPS      : integer;
-             REG_COUNT  : integer range 1 to 64);
-    port    (clk        : in std_logic;
-             reset      : in std_logic;
-             data       : in slv8_array_t(0 to (REG_COUNT - 1));
-             load       : in std_logic;
-             prev       : in std_logic;
-             flash      : in std_logic;
-             dataout    : out std_logic_vector (7 downto 0);
-             SCK        : out std_logic;
-             SDA        : out std_logic);
+    generic (CLKFREQ        : integer;
+             STEPS          : integer;
+             REG_COUNT      : integer range 1 to 64;
+             FLASHLENGTH    : integer;
+             FLASHRATE      : integer);
+    port    (clk            : in std_logic;
+             reset          : in std_logic;
+             addressin      : in unsigned (5 downto 0); 
+             force_address  : in std_logic;
+             data           : in slv8_array_t(0 to (REG_COUNT - 1));
+             load           : in std_logic;
+             prev           : in std_logic;
+             flash          : in std_logic;
+             dataout        : out std_logic_vector (7 downto 0);
+             addressout     : out unsigned (5 downto 0);
+             SCK            : out std_logic;
+             SDA            : out std_logic);
 end component; --end LED_Encoder
 
 begin
 
 TB1 : Button_Decoder --using triButton
-    generic map (CLKFREQ    => CLKFREQ)
-    port map    (clk        => clk,
-                 reset      => reset,
-                 buttonin   => buttonin,
-                 short      => short,
-                 long       => long,
-                 two        => two,
-                 shutdown   => shutdown);
+    generic map (CLKFREQ        => CLKFREQ)
+    port map    (clk            => clk,
+                 reset          => reset,
+                 buttonin       => buttonin,
+                 short          => short,
+                 long           => long,
+                 two            => two,
+                 shutdown       => shutdown);
                                 
 L1 : LED_Encoder --using LED_Encoder
-    generic map (CLKFREQ    => CLKFREQ,
-                 STEPS      => STEPS,
-                 REG_COUNT  => REG_COUNT)
-    port map    (clk        => clk,
-                 reset      => reset,
-                 data       => display_regs,
-                 load       => short,--short, --moves to the next register value
-                 prev       => two,--two --displays the current position in the register
-                 flash      => long, --long --blinks the current value
-                 dataout    => dataout,
-                 SCK        => SCK,
-                 SDA        => SDA);
+    generic map (CLKFREQ        => CLKFREQ,
+                 STEPS          => STEPS,
+                 REG_COUNT      => REG_COUNT,
+                 FLASHLENGTH    => FLASHLENGTH,
+                 FLASHRATE      => FLASHRATE)
+    port map    (clk            => clk,
+                 reset          => reset,
+                 addressin      => addressin,
+                 force_address  => force_address,
+                 data           => display_regs,
+                 load           => short,
+                 prev           => two,
+                 flash          => long,
+                 dataout        => dataout,
+                 addressout     => addressout,
+                 SCK            => SCK,
+                 SDA            => SDA);
 
 --continuous button outputs                   
-shortout <= short;
-longout <= long;
-twoout <= two;
+--shortout <= short;
+--longout <= long;
+--twoout <= two;
 shutdownout <= shutdown;
-
-
-
 
 end Behavioral;

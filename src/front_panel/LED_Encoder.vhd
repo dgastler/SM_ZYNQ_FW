@@ -17,22 +17,27 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-library IEEE; --to use std_logic_vector for my_array package
+library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.types.ALL;
 
 entity LED_Encoder is
-    generic (CLKFREQ     : integer; --onboad clock frequency in hz
-             STEPS      : integer; --how many clk ticks corresond to a SCK tick
-             REG_COUNT  : integer range 1 to 64); --how many entries are in the Darray 
+    generic (CLKFREQ        : integer; --onboad clock frequency in hz
+             STEPS          : integer; --how many clk ticks corresond to a SCK tick
+             REG_COUNT      : integer range 1 to 64;  --how many entries are in the array 
+             FLASHLENGTH    : integer; --how many seconds do you want it to flash for
+             FLASHRATE      : integer);  --how many times do you want it to flash per second
     Port    (clk        : in std_logic;
              reset      : in std_logic;
+             addressin : in unsigned (5 downto 0);
+             force_address : in std_logic;
              data       : in slv8_array_t(0 to (REG_COUNT - 1));
              load       : in std_logic; --moves to the next register value
              prev       : in std_logic; --displays the current position in the register
              flash      : in std_logic; --blinks the current value
              dataout    : out std_logic_vector (7 downto 0);
+             addressout : out unsigned (5 downto 0);
              SCK        : out std_logic;
              SDA        : out std_logic);
 end LED_Encoder;
@@ -51,12 +56,13 @@ signal update       : std_logic; --used to update
 signal active       : std_logic; --used to buffer busy output, never assign directly to this
 signal flashbit     : std_logic; --used for flashing data or 0
 --constants for timing
-signal refresh      : integer := (CLKFREQ / 100); --refresh every 10 ms,
-signal flashrate    : integer := (CLKFREQ / 2); --half a second
+constant refresh        : integer := (CLKFREQ / 100); --refresh every 10 ms,
+constant flashtiming    : integer := (CLKFREQ / (2 * FLASHRATE)); --the rate which the flash happens
+constant endflash       : integer := (2 * (FLASHRATE + 3));
 --counters
-signal position     : unsigned (5 downto 0); --to count position in register
-signal count        : integer range 0 to (CLKFREQ / 2); --for general purpose counting
-signal flashcount   : unsigned (3 downto 0); --to count the amount of times flashed
+signal position         : unsigned (5 downto 0); --to count position in register
+signal count            : integer range 0 to (CLKFREQ / 2); --for general purpose counting
+signal flashcount       : integer range 0 to (endflash + 1); --to count the amount of times flashed
 
 
 --Declare SR_out
@@ -73,6 +79,10 @@ component SR_Out
 end component; --end SR_out
 
 begin
+
+--continuous outputs
+addressout <= position;
+
 
 U1 : SR_Out --using SR_Out
     generic map (STEPS      => STEPS)
@@ -95,7 +105,11 @@ begin
     position <= "000000";
 
   elsif clk'event and clk='1' then
-    if state /= BLINK then
+  
+    if force_address = '1' then
+        position <= addressin;
+        
+    elsif state /= BLINK then
       if load = '1' then
         if to_integer(position) = (REG_COUNT - 1) then
           position <= "000000";
@@ -126,7 +140,7 @@ begin
     update <= '0';
     --reset counters
     count <= 0;
-    flashcount <= "0000";
+    flashcount <= 0;
     
   elsif clk'event and clk='1' then
     --state machine
@@ -136,7 +150,7 @@ begin
           --reset count if moving to BLINK b/c flash is high
           count <= 0;
           flashbit <= '0';
-          flashcount <= "0000";
+          flashcount <= 0;
         else --if not going to BLINK
           --increment count
           count <= count + 1;
@@ -157,13 +171,13 @@ begin
             update <= '0';
         else
             count <= count + 1;
-            if count = flashrate then
+            if count = flashtiming then
                 count <= 0;
                 flashcount <= flashcount + 1;
                 if flashcount = 0 then   --all 1's first flash
                     loaddata <= X"FF";
                     update <= '1';
-                elsif flashcount = 8 then
+                elsif flashcount = endflash then
                     loaddata <= X"FF";
                     update <= '1';
                 elsif flashbit = '1' then --if flashbit = "1' then
@@ -212,7 +226,7 @@ begin
         end if;
 
       when BLINK =>
-        if flashcount = 10 then --prob 9
+        if flashcount = (endflash + 1) then
             State <= IDLE;
         end if;
         

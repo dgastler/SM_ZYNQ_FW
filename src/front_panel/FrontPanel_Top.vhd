@@ -17,32 +17,21 @@
 -- Additional Comments:
 -- 
 ----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
 use work.types.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL; ---del
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
+use IEEE.NUMERIC_STD.ALL; 
 
 entity FrontPanel_Top is
     port    (clk            : in std_logic;
              reset          : in std_logic;
              buttonin       : in std_logic;
+             addressin      : in unsigned (5 downto 0);
+             force_address  : in std_logic;
+             reg4           : in std_logic_vector  (7 downto 0);
              LEDout         : out std_logic_vector (7 downto 0);
-             --for testing, delete ports below this line
-             tshort     : out std_logic;
-             tlong      : out std_logic;
-             ttwo       : out std_logic;
-             tshutdown  : out std_logic);
+             addressout     : out unsigned (5 downto 0);
+             topshutdown    : out std_logic);
 end FrontPanel_Top;
 
 architecture Behavioral of FrontPanel_Top is
@@ -68,7 +57,7 @@ signal count : integer range 0 to 100000000; --del
 signal hold  : std_logic;  --del
 
 --for testing data declarations
-signal display_regs : slv8_array_t(0 to 9) := (
+signal display_regs : slv8_array_t(0 to 13) := (
 0 => x"01",
 1 => x"02",
 2 => x"03",
@@ -89,14 +78,13 @@ component FrontPanel_UI
     port    (clk            : in std_logic;
              reset          : in std_logic;
              buttonin       : in std_logic;
+             addressin      : in unsigned (5 downto 0);
+             force_address  : in std_logic;
              display_regs   : in slv8_array_t (0 to (REG_Count - 1));
-             SCK        : out std_logic;
-             SDA    : out std_logic;
-             --testing below
-             shortout         : out std_logic;
-             longout          : out std_logic;
-             twoout           : out std_logic;
-             shutdownout      : out std_logic);
+             addressout     : out unsigned (5 downto 0);
+             SCK            : out std_logic;
+             SDA            : out std_logic;
+             shutdownout    : out std_logic);
 end component;
              
 
@@ -105,39 +93,29 @@ end component;
 
 begin
 
-
-
 --continuous output
 LEDout <= shiftreg(0) & shiftreg(1) & shiftreg(2) & shiftreg(3) & shiftreg(4) & shiftreg(5) & shiftreg(6) & shiftreg(7);
 --reset for LED includes shutdown signal
 LEDreset <= shutdown or reset;
 
-
-
-
-
+display_regs(4) <= reg4;
 
 F1: FrontPanel_UI
-    generic map (CLKFREQ => 100000000,
-                 REG_COUNT => 10,
-                 FLASHLENGTH => 0,
-                 FLASHRATE => 0)
-    port map    (clk => clk,
-                 reset => reset,
-                 buttonin => buttonin,
-                 display_regs => display_regs,
-                 SCK => SCK2,
-                 SDA => SDA2,
-                 --testing below
-                 shortout => short,
-                 longout => long,
-                 twoout => two,
-                 shutdownout => shutdown);
+    generic map (CLKFREQ        => 100000000,
+                 REG_COUNT      => 14,
+                FLASHLENGTH     => 3,
+                 FLASHRATE      => 2)
+    port map    (clk            => clk,
+                 reset          => reset,
+                 buttonin       => buttonin,
+                 addressin      => addressin,
+                 force_address  => force_address,
+                 display_regs   => display_regs,
+                 addressout     => addressout,
+                 SCK            => SCK2,
+                 SDA            => SDA2,
+                 shutdownout    => shutdown);
     
-
-
-
-
 Shifting : process (clk, reset)
 begin
     if reset = '1' then
@@ -165,23 +143,11 @@ begin
     elsif clk'event and clk='1' then
     
         if hold = '0' then
-            if short = '1' then
-                tshort <= '1';
-                hold <= '1';
-            elsif long = '1' then
-                tlong <= '1';
-                hold <= '1';
-            elsif two = '1' then
-                ttwo <= '1';
-                hold <= '1';
-            elsif shutdown = '1' then
-                tshutdown <= '1';
+            if shutdown = '1' then
+                topshutdown <= '1';
                 hold <= '1';
             else
-                tshutdown <= '0';
-                tshort <= '0';
-                tlong <= '0';
-                ttwo <= '0';
+                topshutdown <= '0';
                 hold <= '0';
                 count <= 0;
             end if;
@@ -194,6 +160,5 @@ begin
         end if;
     end if;
 end process;
-
 
 end Behavioral;
