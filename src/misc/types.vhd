@@ -37,6 +37,7 @@ package types is
   subtype uint27_t is unsigned(26 downto 0);
 
   type u16_array_t is array (integer range <>) of unsigned(47 downto 0);
+  type int8_array_t is array (integer range <>) of integer range 0 to 7;
 
 end package types;
 

@@ -1,0 +1,14 @@
+#-----------------------------------------------------------
+# Vivado v2018.2 (64-bit)
+# SW Build 2258646 on Thu Jun 14 20:02:38 MDT 2018
+# IP Build 2256618 on Thu Jun 14 22:10:49 MDT 2018
+# Start of session at: Thu Jul 11 13:48:46 2019
+# Process ID: 29374
+# Current directory: /home/kremerme/Desktop/work/apollo/bring-up/src/misc
+# Command line: vivado types.vhd
+# Log file: /home/kremerme/Desktop/work/apollo/bring-up/src/misc/vivado.log
+# Journal file: /home/kremerme/Desktop/work/apollo/bring-up/src/misc/vivado.jou
+#-----------------------------------------------------------
+start_gui
+exit
+INFO: [Common 17-206] Exiting Vivado at Thu Jul 11 13:49:48 2019...
