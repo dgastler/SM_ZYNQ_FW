@@ -21,7 +21,7 @@ $(PROG_SI):	$(PROG_SI).o i2c.o
 	$(CXX) $(LDFLAGS) -o $@ $^
 
 $(ESM_UART):	$(ESM_UART).o
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) $(LDFLAGS) -o $@ $^ -lncurses
 
 $(SENDD):	$(SENDD).o
 	$(CXX) $(LDFLAGS) -o $@ $^

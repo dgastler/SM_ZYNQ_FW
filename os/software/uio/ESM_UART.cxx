@@ -11,6 +11,8 @@
 #include <unistd.h> // usleep
 #include <iostream> // cin
 #include <string.h> // strlen
+//#include <deque>
+#include <ncurses.h>
 
 #define RD_ADDR 0xB
 #define RD_AVAILABLE 0x1000
@@ -26,14 +28,6 @@
 
 #define ACK 0x100
 
-//===============================================================================
-//Struct to use for mapping into the AXI slave
-//===============================================================================
-#define REG_COUNT 256
-//struct TestHW {
-//  uint32_t reg[REG_COUNT];
-//};
-
 char const * const usage = "uio r/w addr <data>";
 
 //===============================================================================
@@ -46,7 +40,25 @@ char byteRead = 0;
 //===============================================================================
 
 //===============================================================================
-// helper functions 
+// helper functions
+bool SetNonBlocking(int &fd, bool value) {
+  // Get the previous flags
+  int currentFlags = fcntl(fd, F_GETFL, 0);
+  if(currentFlags < 0) {return false;}
+
+  // Make the socket non-blocking
+  if(value) {
+    currentFlags |= O_NONBLOCK;
+  } else {
+    currentFlags &= ~O_NONBLOCK;
+  }
+
+  int currentFlags2 = fcntl(fd, F_SETFL, currentFlags);
+  if(currentFlags2 < 0) {return false;}
+
+  return(true);
+}
+/*
 void writeByte(uint32_t volatile * hdw, char const byte) {
   hdw[WR_ADDR] = byte;
 }
@@ -102,7 +114,7 @@ int writeLine(uint32_t volatile * hdw, char const msg[]) {
       printf("write buffer half full: slept 1000 microsecs\n");
     }
     
-    // write byte
+`    // write byte
     //    printf("writing...\n");
     hdw[WR_ADDR] = msg[i];
     // Command is done after writing newline
@@ -122,22 +134,14 @@ void overflowAlert() {
   printf("> ");
   rdBufferOverflow = false;
 }
+*/
 //===============================================================================
 
 //int main(int argc, char ** argv){
 int main() {
-
-  //  uint32_t writeData = 0;
-  //uint32_t address;
-  //  bool wr = false; //read = false
-
-  //  uint32_t uioNumber = 0;
   // 3 or 5
-  uint32_t uioNumber = 5;
-  
-  // Write buffer
-  char sendline[MAXWRCOMMAND];
-    
+  uint32_t uioNumber = 6;
+      
   //=============================================================================
   //UIO access
   //============================================================================= 
@@ -152,7 +156,7 @@ int main() {
     fprintf(stderr,"Error!\nBad UIO %s\n",dev);
     return -1;
   }
-
+  
   //setup memory mappings
   uint32_t volatile * hw = (uint32_t *) mmap(NULL,
 					     sizeof(uint32_t), //sizeof(TestHW),
@@ -165,45 +169,69 @@ int main() {
   //Reads and writes
   //=============================================================================
 
-  int writeReturn = 0;
+  int fd = 0; // stdin
+  SetNonBlocking(fd, true);
+
+  char writeByte;
+
+  initscr();
+  cbreak();
+  noecho();
   
   while(true) {
-    // Get command
-    std::cin.getline(sendline, MAXWRCOMMAND);
-    // Append newline
-    sendline[strlen(sendline)] = '\r';
-    
-    // If read buffer overflowed, don't read, alert user and continue
-    if(-1 == (writeReturn = writeLine(hw, sendline))) {
-      overflowAlert();
-      continue;
-    } else if (-2 == writeReturn) {
-      printf("Error: carriage return was not sent\n");
-      continue;
-    }
-    
-    byteRead = 0;
-    // Read all available bytes. If read buffer overflowed, alert user and continue
-    if(-1 == readLine(hw)) {
-      overflowAlert();
-      continue;
+
+    if(RD_FULL & hw[RD_ADDR]) {printf("Buffer full\n");}
+
+    // read
+    if(RD_AVAILABLE & hw[RD_ADDR]) {
+      //while(RD_AVAILABLE & hw[RD_ADDR]) {
+      printf("%c", 0xFF&hw[RD_ADDR]);
+      fflush(stdout);
+      hw[RD_ADDR] = ACK;
+      //}
     }
 
-    printf("Received:\n%s", recvline.c_str());
-    recvline.clear();
+    // If writebuffer half full or full, the command is not sent. This would mean that any typed commands will not show up 
+    //    if(!(WR_FULL_FULL & hw[WR_ADDR]) && (0 < read(fd, &writeByte, sizeof(writeByte)))) {
+    if(0 < read(fd, &writeByte, sizeof(writeByte))) {
+      // Group separator
+      if(29 == writeByte) {break;}
+            
+      if('\n' == writeByte) {
+	hw[WR_ADDR] = '\r';
+      } else {
+	hw[WR_ADDR] = writeByte;
+      }
+    }
   }
-  
-  //=============================================================================
-  //Reads and writes
-  //=============================================================================
-//  hw[0xb]
-//  if(wr){
-//    hw->reg[address] = writeData;
-//    printf("write 0x%02X: 0x%08X\n",address,writeData);
-//  }else{
-//    printf("read  0x%02X: 0x%08X\n",address,hw->reg[address]);
-//  }
-  
 
+  endwin();
+  printf("\n");
+  fflush(stdout);
+//  // Get command
+//  std::cin.getline(sendline, MAXWRCOMMAND);
+//  // Append newline
+//  sendline[strlen(sendline)] = '\r';
+//  
+//  // If read buffer overflowed, don't read, alert user and continue
+//  if(-1 == (writeReturn = writeLine(hw, sendline))) {
+//    overflowAlert();
+//    continue;
+//  } else if (-2 == writeReturn) {
+//    printf("Error: carriage return was not sent\n");
+//    continue;
+//  }
+//  
+//  byteRead = 0;
+//  // Read all available bytes. If read buffer overflowed, alert user and continue
+//  if(-1 == readLine(hw)) {
+//    overflowAlert();
+//    continue;
+//  }
+//
+//  printf("Received:\n%s", recvline.c_str());
+//  recvline.clear();
+//}  
+  
   return 0;
 }
