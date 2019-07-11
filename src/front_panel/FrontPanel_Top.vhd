@@ -68,13 +68,24 @@ signal display_regs : slv8_array_t(0 to 13) := (
 8 => x"09",
 9 => x"0A", others => x"FF");
 
+constant order    : int8_array_t(0 to 7) := (
+0 => 7,
+1 => 0,
+2 => 1,
+3 => 2,
+4 => 3,
+5 => 4,
+6 => 5,
+7 => 6);
+
 --Declare Front UI
 component FrontPanel_UI
     generic (CLKFREQ        : integer;
              REG_COUNT      : integer;
              FLASHLENGTH    : integer;
              FLASHRATE      : integer;
-             SHUTDOWNFLIP   : std_logic);
+             SHUTDOWNFLIP   : std_logic;
+             LEDORDER       : int8_array_t(0 to 7));
     port    (clk            : in std_logic;
              reset          : in std_logic;
              buttonin       : in std_logic;
@@ -103,7 +114,8 @@ F1: FrontPanel_UI
                  REG_COUNT      => 14,
                  FLASHLENGTH    => 3,
                  FLASHRATE      => 2,
-                 SHUTDOWNFLIP   => '1')
+                 SHUTDOWNFLIP   => '1',
+                 LEDORDER       => order)
     port map    (clk            => clk,
                  reset          => reset,
                  buttonin       => buttonin,

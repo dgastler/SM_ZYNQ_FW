@@ -28,7 +28,8 @@ entity LED_Encoder is
              REG_COUNT      : integer range 1 to 64;    --how many entries are in the array 
              FLASHLENGTH    : integer;                  --how many seconds do you want it to flash for
              FLASHRATE      : integer;                  --how many times do you want it to flash per second
-             SHUTDOWNFLIP   : std_logic);               --how many times do you want it to flash per second
+             SHUTDOWNFLIP   : std_logic;
+             LEDORDER       : int8_array_t(0 to 7));               --how many times do you want it to flash per second
     Port    (clk            : in std_logic;                             --clk
              reset          : in std_logic;                             --reset            
              addressin      : in unsigned (5 downto 0);                 --input address
@@ -72,7 +73,8 @@ signal A5count          : integer range 0 to 50;                                
 
 --Declare SR_out
 component SR_Out
-    generic (STEPS      : integer);
+    generic (STEPS      : integer;
+             LEDORDER   : int8_array_t(0 to 7));
     Port    (clk        : in std_logic;
              reset      : in std_logic;
              datain     : in std_logic_vector (7 downto 0);
@@ -90,7 +92,8 @@ addressout <= position;
 
 
 U1 : SR_Out --using SR_Out
-    generic map (STEPS      => STEPS)
+    generic map (STEPS      => STEPS,
+                 LEDORDER   => LEDORDER)
     port map    (clk        => clk,
                  reset      => reset,
                  datain     => LoadData,

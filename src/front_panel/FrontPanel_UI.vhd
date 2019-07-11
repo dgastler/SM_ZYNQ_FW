@@ -27,14 +27,15 @@ entity FrontPanel_UI is
              REG_COUNT      : integer range 1 to 64 := 14;  --how many entries are in the array
              FLASHLENGTH    : integer := 3;                 --how many seconds do you want it to flash for
              FLASHRATE      : integer := 2;                 --how many times do you want it to flash per second
-             SHUTDOWNFLIP   : std_logic := '1');            --if 1 flash AA-55, if 0 go to reg0
+             SHUTDOWNFLIP   : std_logic := '1';             --if 1 flash AA-55, if 0 go to reg0
+             LEDORDER       : int8_array_t(0 to 7) := (0 => 0, 1 => 1, 2 =>2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 =>7)); --Specifies a map for LED usag      
     Port    (clk            : in std_logic;                             --onboard clk
              reset          : in std_logic;                             --reset system
              buttonin       : in std_logic;                             --button input
-             addressin        : in unsigned (5 downto 0);               --address input
-             force_address    : in std_logic;                           --forces the input address onto the LED_Encoder
-             display_regs   : in slv8_array_t(0 to (REG_COUNT - 1));    -- := (others => x"00");
-             addressout        : out unsigned (5 downto 0);             --The address in the display_regs currently being displayed
+             addressin      : in unsigned (5 downto 0);               --address input
+             force_address  : in std_logic;                           --forces the input address onto the LED_Encoder
+             display_regs   : in slv8_array_t(0 to (REG_COUNT - 1));    --Input data
+             addressout     : out unsigned (5 downto 0);             --The address in the display_regs currently being displayed
              SCK            : out std_logic;                            --serial clk
              SDA            : out std_logic;                            --serial data
              shutdownout    : out std_logic);                           --shutdown signal            
@@ -71,7 +72,8 @@ component LED_Encoder
              REG_COUNT      : integer range 1 to 64;
              FLASHLENGTH    : integer;
              FLASHRATE      : integer;
-             SHUTDOWNFLIP   : std_logic);
+             SHUTDOWNFLIP   : std_logic;
+             LEDORDER       : int8_array_t(0 to 7));
     port    (clk            : in std_logic;
              reset          : in std_logic;
              addressin      : in unsigned (5 downto 0); 
@@ -105,7 +107,8 @@ L1 : LED_Encoder --using LED_Encoder
                  REG_COUNT      => REG_COUNT,
                  FLASHLENGTH    => FLASHLENGTH,
                  FLASHRATE      => FLASHRATE,
-                 SHUTDOWNFLIP   => SHUTDOWNFLIP)
+                 SHUTDOWNFLIP   => SHUTDOWNFLIP,
+                 LEDORDER       => LEDORDER)
     port map    (clk            => clk,
                  reset          => reset,
                  addressin      => addressin,

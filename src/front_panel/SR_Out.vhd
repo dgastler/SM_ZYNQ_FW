@@ -21,18 +21,13 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
+use work.types.ALL;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity SR_Out is
-    generic (STEPS      : integer);
+    generic (STEPS      : integer;
+             LEDORDER   : int8_array_t(0 to 7));
     Port    (clk        : in std_logic;
              reset      : in std_logic;
              datain     : in std_logic_vector (7 downto 0);
@@ -57,8 +52,20 @@ signal finish       : std_logic; --for signaling that readout is done
 signal shift        : std_logic; --for signaling a shift
 --Shiftregister
 signal shiftreg     : std_logic_vector (7 downto 0);
+--signal for interpreting the LEDMAP
+signal datamap      : std_logic_vector (7 downto 0);
 
 begin
+
+--loading datamap based on LEDORDER
+datamap(0) <= datain(LEDORDER(0));
+datamap(1) <= datain(LEDORDER(1));
+datamap(2) <= datain(LEDORDER(2));
+datamap(3) <= datain(LEDORDER(3));
+datamap(4) <= datain(LEDORDER(4));
+datamap(5) <= datain(LEDORDER(5));
+datamap(6) <= datain(LEDORDER(6));
+datamap(7) <= datain(LEDORDER(7));
 
 --continuous assignment of outputs
 busy    <= active;
@@ -104,7 +111,7 @@ begin
             if update = '1' then
                 active <= '1';
                 dataout <= datain;
-                shiftreg <= datain;
+                shiftreg <= datamap; --datain
             else
                 dataout <= X"00";
             end if;
