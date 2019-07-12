@@ -761,7 +761,7 @@ CONFIG_setserial=y
 #
 # strace 
 #
-# CONFIG_strace is not set
+CONFIG_strace=y
 # CONFIG_strace-dev is not set
 # CONFIG_strace-dbg is not set
 
@@ -1207,7 +1207,7 @@ CONFIG_run-postinsts=y
 #
 # boost 
 #
-# CONFIG_boost is not set
+CONFIG_boost=y
 # CONFIG_boost-random is not set
 CONFIG_boost-regex=y
 # CONFIG_boost-atomic is not set
@@ -1224,7 +1224,7 @@ CONFIG_boost-system=y
 # CONFIG_boost-wave is not set
 CONFIG_boost-chrono=y
 # CONFIG_boost-timer is not set
-# CONFIG_boost-dev is not set
+CONFIG_boost-dev=y
 # CONFIG_boost-program-options is not set
 # CONFIG_boost-iostreams is not set
 # CONFIG_boost-dbg is not set
@@ -1963,11 +1963,11 @@ CONFIG_boost-chrono=y
 #
 # ncurses 
 #
-# CONFIG_ncurses is not set
-# CONFIG_ncurses-terminfo-base is not set
-# CONFIG_ncurses-dev is not set
+CONFIG_ncurses=y
+CONFIG_ncurses-terminfo-base=y
+CONFIG_ncurses-dev=y
 # CONFIG_ncurses-tools is not set
-# CONFIG_ncurses-terminfo is not set
+CONFIG_ncurses-terminfo=y
 # CONFIG_ncurses-dbg is not set
 
 #
@@ -2075,8 +2075,8 @@ CONFIG_boost-chrono=y
 #
 # readline 
 #
-# CONFIG_readline is not set
-# CONFIG_readline-dev is not set
+CONFIG_readline=y
+CONFIG_readline-dev=y
 # CONFIG_readline-dbg is not set
 
 #
@@ -2596,7 +2596,7 @@ CONFIG_packagegroup-core-boot=y
 #
 # packagegroup-core-buildessential 
 #
-# CONFIG_packagegroup-core-buildessential is not set
+CONFIG_packagegroup-core-buildessential=y
 # CONFIG_packagegroup-core-buildessential-dev is not set
 # CONFIG_packagegroup-core-buildessential-dbg is not set
 
