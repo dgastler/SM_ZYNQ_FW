@@ -169,10 +169,16 @@ proc AXI_C2C_MASTER {device_name} {
     set_property CONFIG.C_INTERFACE_TYPE {2}	    [get_bd_cells $device_name]
     set_property CONFIG.C_AURORA_WIDTH {1.0}        [get_bd_cells $device_name]
     set_property CONFIG.C_EN_AXI_LINK_HNDLR {false} [get_bd_cells $device_name]
+    set_property CONFIG.C_INCLUDE_AXILITE   {1}     [get_bd_cells $device_name]
 
-    [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
+    #axi interface
+    [AXI_DEV_CONNECT ${device_name} $AXI_BUS_M(${device_name}) $AXI_BUS_CLK(${device_name}) $AXI_BUS_RST(${device_name})]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
     connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+
+    #axi lite interface
+    [AXI_LITE_DEV_CONNECT ${device_name} $AXI_BUS_M(${device_name}_LITE) $AXI_BUS_CLK(${device_name}_LITE) $AXI_BUS_RST(${device_name}_LITE)]
+    connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK(${device_name}_LITE)]
 
     make_bd_pins_external       -name ${device_name}_aurora_pma_init_in [get_bd_pins ${device_name}/aurora_pma_init_in]
     #expose debugging signals
