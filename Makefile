@@ -17,6 +17,7 @@ VIVADO_SHELL="/opt/Xilinx/Vivado/"$(VIVADO_VERSION)"/settings64.sh"
 SETUP_TCL=scripts/Setup.tcl
 BUILD_TCL=scripts/Build.tcl
 SETUP_BUILD_TCL=scripts/SetupAndBuild.tcl
+HW_TCL=scripts/Run_hw.tcl
 
 #################################################################################
 # Source files
@@ -68,11 +69,18 @@ open_project :
 	@source $(VIVADO_SHELL) &&\
 	cd proj &&\
 	vivado top.xpr
-
+open_synth : 
+	@source $(VIVADO_SHELL) &&\
+	cd proj &&\
+	vivado post_synth.dcp
 open_impl : 
 	@source $(VIVADO_SHELL) &&\
 	cd proj &&\
 	vivado post_route.dcp
+open_hw :
+	@source $(VIVADO_SHELL) &&\
+	cd proj &&\
+	vivado -source ../$(HW_TCL)
 
 
 #################################################################################

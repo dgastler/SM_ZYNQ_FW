@@ -30,11 +30,11 @@ entity CM_interface is
     to_CM1_in       :  in to_CM_t;  --from SM
     to_CM2_in       :  in to_CM_t;  --from SM
     to_CM1_out      : out to_CM_t;  --from SM, but tristated
-    to_CM2_out      : out to_CM_t   --from SM, but tristated
-
-
-    
-    
+    to_CM2_out      : out to_CM_t;  --from SM, but tristated
+    CM1_C2C_Mon     :  in C2C_Monitor_t;
+    CM2_C2C_Mon     :  in C2C_Monitor_t;
+    CM1_C2C_Ctrl    : out C2C_Control_t;
+    CM2_C2C_Ctrl    : out C2C_Control_t
     );
 end entity CM_interface;
 
@@ -198,7 +198,7 @@ begin  -- architecture behavioral
     localRdData <= x"00000000";
     if localRdReq = '1' then
       localRdAck  <= '1';
-      case localAddress(3 downto 0) is
+      case localAddress(7 downto 0) is
         when x"0" =>
           localRdData( 3 downto  0) <= reg_data(0)( 3 downto  0);
           localRdData( 4) <= not CM1_disable;  -- CM1 outputs enabled
@@ -212,6 +212,20 @@ begin  -- architecture behavioral
           localRdData(12) <= uart_rd_available(0);
           localRdData(13) <= uart_rd_half_full(0);
           localRdData(14) <= uart_rd_full(0);
+        when x"12" =>
+          localRdData(0) <= CM1_C2C_Mon.axi_c2c_config_error_out;   
+          localRdData(1) <= CM1_C2C_Mon.axi_c2c_link_error_out;     
+          localRdData(2) <= CM1_C2C_Mon.axi_c2c_link_status_out;    
+          localRdData(3) <= CM1_C2C_Mon.axi_c2c_multi_bit_error_out;
+          localRdData(4) <= CM1_C2C_Mon.aurora_do_cc;
+          localRdData(5) <= reg_data(18)(5);
+          
+          localRdData(8) <= CM1_C2C_Mon.phy_link_reset_out;     
+          localRdData(9) <= CM1_C2C_Mon.phy_gt_pll_lock;        
+          localRdData(10) <= CM1_C2C_Mon.phy_mmcm_not_locked_out;
+          localRdData(12 + CM1_C2C_Mon.phy_lane_up'length -1 downto 12) <= CM1_C2C_Mon.phy_lane_up;
+          localRdData(16) <= CM1_C2C_Mon.phy_hard_err;           
+          localRdData(17) <= CM1_C2C_Mon.phy_soft_err;                                       
         when x"20" =>
           localRdData( 7 downto  0) <= reg_data(32)( 7 downto  0);
           localRdData(13) <= uart_wr_half_full(1);
@@ -221,12 +235,30 @@ begin  -- architecture behavioral
           localRdData(12) <= uart_rd_available(1);
           localRdData(13) <= uart_rd_half_full(1);
           localRdData(14) <= uart_rd_full(1);
+        when x"22" =>
+          localRdData(0) <= CM2_C2C_Mon.axi_c2c_config_error_out;   
+          localRdData(1) <= CM2_C2C_Mon.axi_c2c_link_error_out;     
+          localRdData(2) <= CM2_C2C_Mon.axi_c2c_link_status_out;    
+          localRdData(3) <= CM2_C2C_Mon.axi_c2c_multi_bit_error_out;
+          localRdData(4) <= CM2_C2C_Mon.aurora_do_cc;
+          localRdData(5) <= reg_data(34)(5);
+          
+          localRdData(8) <= CM2_C2C_Mon.phy_link_reset_out;     
+          localRdData(9) <= CM2_C2C_Mon.phy_gt_pll_lock;        
+          localRdData(10) <= CM2_C2C_Mon.phy_mmcm_not_locked_out;
+          localRdData(12 + CM2_C2C_Mon.phy_lane_up'length -1 downto 12) <= CM2_C2C_Mon.phy_lane_up;
+          localRdData(16) <= CM2_C2C_Mon.phy_hard_err;           
+          localRdData(17) <= CM2_C2C_Mon.phy_soft_err;                                       
+
         when others =>
           localRdData <= x"00000000";
       end case;
     end if;
   end process reads;
 
+
+  CM1_C2C_Ctrl.aurora_pma_init_in <= reg_data(18)(5);
+  CM2_C2C_Ctrl.aurora_pma_init_in <= reg_data(34)(5);
   reg_writes: process (clk_axi, reset_axi_n) is
   begin  -- process reg_writes
     if reset_axi_n = '0' then                 -- asynchronous reset (active high)
@@ -235,7 +267,7 @@ begin  -- architecture behavioral
       uart_wr_en <= (others => '0');
       uart_rd_en <= (others => '0');
       if localWrEn = '1' then
-        case localAddress(3 downto 0) is
+        case localAddress(7 downto 0) is
           when x"0" =>
             reg_data(0)( 3 downto  0) <= localWrData(3 downto 0);
           when x"10" =>
@@ -243,11 +275,15 @@ begin  -- architecture behavioral
             uart_wr_en(0) <= '1';
           when x"11" =>
             uart_rd_en(0) <= '1';
+          when x"12" =>
+            reg_data(18)(5)  <= localWrData(5);
           when x"20" =>
             reg_data(16)(7 downto 0) <= localWrData(7 downto 0);
             uart_wr_en(0) <= '1';
           when x"21" =>
             uart_rd_en(0) <= '1';
+          when x"22" =>
+            reg_data(34)(5)  <= localWrData(5);
           when others => null;
         end case;
       end if;

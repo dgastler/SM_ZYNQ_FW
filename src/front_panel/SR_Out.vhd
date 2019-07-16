@@ -58,14 +58,14 @@ signal datamap      : std_logic_vector (7 downto 0);
 begin
 
 --loading datamap based on LEDORDER
-datamap(0) <= datain(LEDORDER(0));
-datamap(1) <= datain(LEDORDER(1));
-datamap(2) <= datain(LEDORDER(2));
-datamap(3) <= datain(LEDORDER(3));
-datamap(4) <= datain(LEDORDER(4));
-datamap(5) <= datain(LEDORDER(5));
-datamap(6) <= datain(LEDORDER(6));
-datamap(7) <= datain(LEDORDER(7));
+datamap(LEDORDER(0)) <= datain(0);
+datamap(LEDORDER(1)) <= datain(1);
+datamap(LEDORDER(2)) <= datain(2);
+datamap(LEDORDER(3)) <= datain(3);
+datamap(LEDORDER(4)) <= datain(4);
+datamap(LEDORDER(5)) <= datain(5);
+datamap(LEDORDER(6)) <= datain(6);
+datamap(LEDORDER(7)) <= datain(7);
 
 --continuous assignment of outputs
 busy    <= active;

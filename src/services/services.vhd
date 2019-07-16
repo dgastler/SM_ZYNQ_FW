@@ -216,7 +216,7 @@ begin  -- architecture behavioral
   TTC_SRC_SEL <= reg_data(4)( 0);   -- TTC source select (0: TCDS, 1: TTC_FAKE)
   LHC_SRC_SEL <= reg_data(5)( 4);   -- LHC clk select
   HQ_SRC_SEL  <= reg_data(5)(12);   -- HQ clk select
-  FP_LED_RST  <= reg_data(8)( 0);   -- FP LED reste
+  FP_LED_RST  <= not reg_data(8)( 0);   -- FP LED reste
   FP_LED_CLK  <= reg_data(8)( 1);   -- FP LED clk
   FP_LED_SDA  <= reg_data(8)( 2);   -- FP LED sda
 

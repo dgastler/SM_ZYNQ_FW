@@ -23,26 +23,19 @@ set vhdl_files "\
      src/IPMC_i2c_slave/IPMC_i2c_slave.vhd \
      src/CM_interface/CM_interface.vhd \
      src/CM_interface/CM_package.vhd \
+     src/front_panel/Button_Debouncer.vhd \
+     src/front_panel/Button_Decoder.vhd \
+     src/front_panel/FrontPanel_UI.vhd \
+     src/front_panel/LED_Encoder.vhd \
+     src/front_panel/SR_Out.vhd \
      "
 
-#     src/TCDS/lhc_clock_module.vhd \
-#     src/TCDS/lhc_gt_usrclk_source.vhd \
-#     src/TCDS/lhc_support.vhd \
-#     src/TCDS/MGBT2_common_reset.vhd \
-#     src/TCDS/MGBT2_common.vhd \
-#     src/TCDS/TCDS.vhd \
-#
-#     src/SGMII/i2c_package.vhd \
-#     src/SGMII/I2C_reg_master.vhd \
-#     src/SGMII/SGMII_SiConfig.vhd \
-#     src/SGMII/SGMII_SiConfig_data.vhd \
 
 set xdc_files src/top.xdc
 
 set xci_files "\
     	      cores/SGMII_INTF/SGMII_INTF.xci \
     	      cores/onboard_CLK/onboard_CLK.xci \
-	      cores/aurora_64b66b_0/aurora_64b66b_0.xci \
     	      "
 
-#	      cores/LHC/LHC.xci \
+#	      cores/aurora_64b66b_0/aurora_64b66b_0.xci \

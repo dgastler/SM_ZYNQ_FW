@@ -28,7 +28,9 @@ entity FrontPanel_UI is
              FLASHLENGTH    : integer := 3;                 --how many seconds do you want it to flash for
              FLASHRATE      : integer := 2;                 --how many times do you want it to flash per second
              SHUTDOWNFLIP   : std_logic := '1';             --if 1 flash AA-55, if 0 go to reg0
-             LEDORDER       : int8_array_t(0 to 7) := (0 => 0, 1 => 1, 2 =>2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 =>7)); --Specifies a map for LED usag      
+             LEDORDER       : int8_array_t(0 to 7) := (0 => 0, 1 => 1, 2 =>2, 3 => 3,
+                                                       4 => 4, 5 => 5, 6 => 6, 7 =>7)); --Specifies a map for LED
+                                                                                        --usage (0 => 5) means bit 0 is displayed on LED 5       
     Port    (clk            : in std_logic;                             --onboard clk
              reset          : in std_logic;                             --reset system
              buttonin       : in std_logic;                             --button input
