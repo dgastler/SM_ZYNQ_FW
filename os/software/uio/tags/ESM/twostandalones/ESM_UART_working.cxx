@@ -170,7 +170,7 @@ int main() {
   //=============================================================================
 
   int fd = 0; // stdin
-  //SetNonBlocking(fd, true);
+  SetNonBlocking(fd, true);
 
   char writeByte;
 
@@ -182,7 +182,7 @@ int main() {
   
   while(true) {
 
-    usleep(10);
+    //usleep(10);
     
     if(RD_FULL & hw[RD_ADDR]) {printf("Buffer full\n");}
 
