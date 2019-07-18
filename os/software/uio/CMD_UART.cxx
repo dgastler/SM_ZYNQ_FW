@@ -50,7 +50,7 @@ bool SetNonBlocking(int &fd, bool value) {
 int main(int argc, char ** argv){                                                                             
   //int main() {
 
-  if(1 != argc) {
+  if(2 != argc) {
     printf("One argument only!\n");
     return 0;
   }
