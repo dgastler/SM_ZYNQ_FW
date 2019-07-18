@@ -15,12 +15,19 @@ proc clear_global {variable} {
 [clear_global AXI_BUS_RST]
 [clear_global AXI_ADDR]
 [clear_global AXI_ADDR_RANGE]
+[clear_global AXI_INTERCONNECT_NAME]
 
 array set AXI_BUS_M {}
 array set AXI_BUS_CLK {}
 array set AXI_BUS_RST {}
 array set AXI_ADDR {}
 array set AXI_ADDR_RANGE {}
+
+proc SET_AXI_INTERCONNECT_NAME {name} {
+    global AXI_INTERCONNECT_NAME
+    set AXI_INTERCONNECT_NAME $name
+    puts "setting axi interconnect name"
+}
 
 #This function adds a axi slave and its paramters to a global list of axi devices
 #This list is used to set how many ports there are on the axi interconnect
@@ -58,7 +65,7 @@ proc AXI_DEVICE_ADD {device_name axi_master axi_clk axi_rst axi_freq {addr_offse
 
     set AXI_ADDR_RANGE($device_name) $addr_range
     
-    puts "adding stuff"
+    puts "adding $device_name to list"
 }
 
 
@@ -86,13 +93,12 @@ proc AXI_PL_CONNECT {devices} {
     global AXI_ADDR
     global AXI_ADDR_RANGE
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_MASTER_RSTN
     global AXI_INTERCONNECT_NAME
   
     
     #create connections for each PL device
     foreach dev $devices {
-	#	[AXI_PL_DEV_CONNECT $dev  $AXI_INTERCONNECT_NAME $AXI_BUS_M($dev)  $AXI_BUS_CLK($dev)  $AXI_BUS_RST($dev)  $AXI_BUS_FREQ($dev) $AXI_ADDR($dev) $AXI_ADDR_RANGE($dev)]
 	[AXI_PL_DEV_CONNECT $dev ]
     }
 
@@ -114,7 +120,7 @@ proc AXI_PL_CONNECT {devices} {
 #  axi_clk: the clock used for this axi slave/master channel
 #  axi_reset_n: the reset used for this axi slave/master channel
 #  axi_clk_freq: the frequency of the AXI clock used for slave/master
-#proc AXI_PL_DEV_CONNECT {device_name axi_interconnect_name axi_master_name axi_clk axi_reset_n axi_clk_freq axi_address axi_address_range} {
+
 proc AXI_PL_DEV_CONNECT {device_name} {
     global AXI_BUS_M
     global AXI_BUS_RST

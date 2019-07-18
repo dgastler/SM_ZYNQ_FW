@@ -22,6 +22,9 @@ source ../bd/build_CPU.tcl
 #puts "Building AXI interconnect"
 source ../bd/build_AXI_interconnect.tcl
 
+[BUILD_AXI_INTERCONNECT ${AXI_INTERCONNECT_NAME} ${AXI_MASTER_CLK} ${AXI_MASTER_RSTN} [list processing_system7_0/M_AXI_GP0] [list ${AXI_MASTER_CLK}] [list ${AXI_MASTER_RSTN}]]
+
+
 
 #================================================================================
 #  Configure and add AXI slaves
@@ -29,28 +32,6 @@ source ../bd/build_AXI_interconnect.tcl
 #puts $AXI_MASTER_CLK
 #puts $AXI_MASTER_RST
 CONFIGURE_AXI_SLAVES
-
-
-######========================================
-######  FP LEDs (xilinx axi gpio)
-######========================================
-######add a GPIO device to the interconnect
-#####create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 FP_LEDs
-#####set_property CONFIG.C_GPIO_WIDTH  {4} [get_bd_cells FP_LEDs]
-#####set_property CONFIG.C_ALL_OUTPUTS {1} [get_bd_cells FP_LEDs]
-######connect to AXI, clk, and reset
-#####[AXI_DEV_CONNECT FP_LEDs $AXI_BUS_M(FP_LEDs) $AXI_MASTER_CLK $AXI_MASTER_RST]
-######make external pins
-#####apply_bd_automation -rule xilinx.com:bd_rule:board -config { Manual_Source {Auto}}  [get_bd_intf_pins FP_LEDs/GPIO]
-#####connect_bd_net $AXI_MASTER_CLK [get_bd_pins $AXI_BUS_CLK(FP_LEDs)]
-#####connect_bd_net $AXI_MASTER_RST [get_bd_pins $AXI_BUS_RST(FP_LEDs)]
-#####[AXI_DEV_UIO_DTSI_CHUNK FP_LEDs]
-######========================================
-######  Add non-xilinx AXI slave
-######========================================
-######[AXI_PL_DEV_CONNECT myReg $AXI_INTERCONNECT_NAME $AXI_BUS_M(MY_REG) PL_CLK PL_RESET_N 125000000]
-#####[AXI_PL_DEV_CONNECT myReg $AXI_INTERCONNECT_NAME $AXI_BUS_M(MY_REG) $AXI_BUS_CLK(MY_REG) $AXI_BUS_RST(MY_REG) 125000000]
-#####
 
 #========================================
 #  Finish up

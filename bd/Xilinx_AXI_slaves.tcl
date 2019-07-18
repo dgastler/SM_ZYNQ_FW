@@ -4,7 +4,7 @@ proc AXI_IP_I2C {device_name} {
     global AXI_BUS_RST
     global AXI_BUS_CLK
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_SLAVE_RSTN
 
     create_bd_cell -type ip -vlnv xilinx.com:ip:axi_iic:2.0 $device_name
 
@@ -18,7 +18,7 @@ proc AXI_IP_I2C {device_name} {
     #connect to AXI, clk, and reset between slave and mastre
     [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_SLAVE_RSTN] [get_bd_pins $AXI_BUS_RST($device_name)]
     #build the DTSI chunk for this device to be a UIO
     [AXI_DEV_UIO_DTSI_POST_CHUNK $device_name]
     puts "Added Xilinx I2C AXI Slave: $device_name"
@@ -29,7 +29,7 @@ proc AXI_IP_XVC {device_name} {
     global AXI_BUS_RST
     global AXI_BUS_CLK
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_SLAVE_RSTN
     #Create a xilinx axi debug bridge
     create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 $device_name
     #configure the debug bridge to be 
@@ -39,7 +39,7 @@ proc AXI_IP_XVC {device_name} {
     #connect to AXI, clk, and reset between slave and mastre
     [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_SLAVE_RSTN] [get_bd_pins $AXI_BUS_RST($device_name)]
 
     
     #generate ports for the JTAG signals
@@ -55,7 +55,7 @@ proc AXI_IP_LOCAL_XVC {device_name} {
     global AXI_BUS_RST
     global AXI_BUS_CLK
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_SLAVE_RSTN
     #Create a xilinx axi debug bridge
     create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 $device_name
     #configure the debug bridge to be 
@@ -66,7 +66,7 @@ proc AXI_IP_LOCAL_XVC {device_name} {
     #connect to AXI, clk, and reset between slave and mastre
     [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_SLAVE_RSTN] [get_bd_pins $AXI_BUS_RST($device_name)]
 
     #build the DTSI chunk for this device to be a UIO
     [AXI_DEV_UIO_DTSI_POST_CHUNK $device_name]
@@ -78,7 +78,7 @@ proc AXI_IP_UART {device_name baud_rate} {
     global AXI_BUS_RST
     global AXI_BUS_CLK
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_SLAVE_RSTN
     #Create a xilinx UART
     create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 $device_name
     #configure the debug bridge to be
@@ -87,7 +87,7 @@ proc AXI_IP_UART {device_name baud_rate} {
     #connect to AXI, clk, and reset between slave and mastre
     [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_SLAVE_RSTN] [get_bd_pins $AXI_BUS_RST($device_name)]
 
     
     #generate ports for the JTAG signals
@@ -159,7 +159,7 @@ proc AXI_C2C_MASTER {device_name} {
     global AXI_BUS_RST
     global AXI_BUS_CLK
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_SLAVE_RSTN
 
     create_bd_cell -type ip -vlnv xilinx.com:ip:axi_chip2chip:5.0 $device_name
     set_property CONFIG.C_AXI_STB_WIDTH {4}         [get_bd_cells $device_name]
@@ -174,7 +174,7 @@ proc AXI_C2C_MASTER {device_name} {
     #axi interface
     [AXI_DEV_CONNECT ${device_name} $AXI_BUS_M(${device_name}) $AXI_BUS_CLK(${device_name}) $AXI_BUS_RST(${device_name})]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_SLAVE_RSTN] [get_bd_pins $AXI_BUS_RST($device_name)]
 
     #axi lite interface
     [AXI_LITE_DEV_CONNECT ${device_name} $AXI_BUS_M(${device_name}_LITE) $AXI_BUS_CLK(${device_name}_LITE) $AXI_BUS_RST(${device_name}_LITE)]
@@ -200,7 +200,7 @@ proc AXI_IP_XADC {device_name} {
     global AXI_BUS_RST
     global AXI_BUS_CLK
     global AXI_MASTER_CLK
-    global AXI_MASTER_RST
+    global AXI_SLAVE_RSTN
 
     #create XADC AXI slave 
     create_bd_cell -type ip -vlnv xilinx.com:ip:xadc_wiz:3.3 ${device_name}
@@ -212,7 +212,7 @@ proc AXI_IP_XADC {device_name} {
     #connect to interconnect
     [AXI_DEV_CONNECT $device_name $AXI_BUS_M($device_name) $AXI_BUS_CLK($device_name) $AXI_BUS_RST($device_name)]
     connect_bd_net [get_bd_pins $AXI_MASTER_CLK] [get_bd_pins $AXI_BUS_CLK($device_name)]
-    connect_bd_net [get_bd_pins $AXI_MASTER_RST] [get_bd_pins $AXI_BUS_RST($device_name)]
+    connect_bd_net [get_bd_pins $AXI_SLAVE_RSTN] [get_bd_pins $AXI_BUS_RST($device_name)]
 
     
     #expose alarms
