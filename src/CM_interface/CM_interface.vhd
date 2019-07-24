@@ -129,13 +129,24 @@ begin  -- architecture behavioral
   begin  -- process CM_powerup
       CM1_disable <= '1';
       if enableCM(0) = '1' then
-        CM1_disable <= (from_CM1.PWR_good and (not overridePWRGood(0)));
+        if from_CM1.PWR_good = '0' and overridePWRGood(0) = '0' then
+          CM1_disable <= '1';
+        else
+          CM1_disable <= '0';
+        end if;
+--        CM1_disable <= (from_CM1.PWR_good and (not overridePWRGood(0)));
 --        CM1_disable <= (not from_CM1.PWR_good) and (not overridePWRGood(0));
       end if;
 
       CM2_disable <= '1';
       if enableCM(1) = '1' then
-        CM2_disable <= (from_CM2.PWR_good and (not overridePWRGood(1)));
+        if from_CM2.PWR_good = '0' and overridePWRGood(1) = '0' then
+          CM2_disable <= '1';
+        else
+          CM2_disable <= '0';
+        end if;
+
+--        CM2_disable <= (from_CM2.PWR_good and (not overridePWRGood(1)));
         --CM2_disable <= (not from_CM2.PWR_good) and (not overridePWRGood(1));
       end if;
   end process CM_powerup;
