@@ -98,6 +98,41 @@ $(BIT)	:
 	mkdir -p proj &&\
 	cd proj &&\
 	vivado $(VIVADO_FLAGS) -source ../$(SETUP_BUILD_TCL) $(OUTPUT_MARKUP)
+
+#################################################################################         
+# Sim     
+#################################################################################         
+build_vdb_list = $(patsubst %.vhd,%.vdb,$(subst src/,sim/vhdl/,$(1)))                                                                                                     
+define TB_RULE =    
+	set -o pipefail &&\
+	source $(VIVADO_SHELL) && \
+	cd sim &&\
+	xvhdl $@/$@.vhd $(OUTPUT_MARKUP)
+	@mkdir -p sim/ && \
+	source $(VIVADO_SHELL) &&\
+	cd sim &&\
+	xelab -debug typical $@ -s $@ $(OUTPUT_MARKUP)      
+	source $(VIVADO_SHELL) &&\
+	cd sim &&\
+	xsim $@ -gui -t $@/setup.tcl    
+endef     
+
+#build the vdb file from a vhd file     
+sim/vhdl/%.vdb : src/%.vhd    
+	@echo "Building $@ from $<"     
+	@rm -rf $@
+	@mkdir -p sim/vhdl && \
+	source $(VIVADO_SHELL) && \
+	cd sim &&\
+	xvhdl ../$< $(OUTPUT_MARKUP)    
+	@cd sim && mkdir -p $(subst src,vhdl,$(dir $<))     
+	@cd sim && ln -f -s $(PWD)/sim/xsim.dir/work/$(notdir $@) $(subst src,vhdl,$(dir $<))     
+
+TB_MISC_VDBS=$(call build_vdb_list, src/misc/types.vhd)
+
+TB_CM_PWR_VDBS=$(TB_MISC_VDBS) $(call build_vdb_list, src/CM_interface/CM_pwr.vhd)    
+tb_CM_pwr : $(TB_CM_PWR_VDBS)  
+	$(TB_RULE)     
 #################################################################################
 # Help 
 #################################################################################

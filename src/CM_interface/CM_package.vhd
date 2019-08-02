@@ -36,7 +36,7 @@ package CM_package is
     PWR_good : std_logic;
     UART_Rx  : std_logic;
     TDO      : std_logic;
-    GPIO     : slv_3_t;
+    GPIO     : slv_2_t;
   end record from_CM_t;
 
 end package CM_package;

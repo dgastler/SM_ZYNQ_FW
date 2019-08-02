@@ -22,6 +22,7 @@ set vhdl_files "\
      src/IPMC_i2c_slave/i2c_slave.vhd \
      src/IPMC_i2c_slave/IPMC_i2c_slave.vhd \
      src/CM_interface/CM_interface.vhd \
+     src/CM_interface/CM_pwr.vhd \
      src/CM_interface/CM_package.vhd \
      src/front_panel/Button_Debouncer.vhd \
      src/front_panel/Button_Decoder.vhd \
