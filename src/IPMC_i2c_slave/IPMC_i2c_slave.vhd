@@ -91,7 +91,7 @@ begin  -- architecture behavioral
       address          => "1100000",
       data_out         => master_i2c_data,
       data_out_dv      => master_i2c_dv,
-      data_in          => slave_i2c_data,
+      data_in          => x"a5",--slave_i2c_data,
       register_address => i2c_address);
   
   AXIRegBridge : entity work.axiLiteReg

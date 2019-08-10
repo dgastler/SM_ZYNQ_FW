@@ -59,6 +59,9 @@ clean_os:
 clean: clean_bd clean_ip clean_bit clean_os
 	@rm -rf ./proj/*
 	@echo "Cleaning up"
+sim_clean :
+	@cd sim && rm -rf xsim.dir vhdl webtalk* xelab* xvhdl* *.log *.jou
+	@echo cleaning up sim directory
 
 
 #################################################################################
@@ -128,11 +131,16 @@ sim/vhdl/%.vdb : src/%.vhd
 	@cd sim && mkdir -p $(subst src,vhdl,$(dir $<))     
 	@cd sim && ln -f -s $(PWD)/sim/xsim.dir/work/$(notdir $@) $(subst src,vhdl,$(dir $<))     
 
-TB_MISC_VDBS=$(call build_vdb_list, src/misc/types.vhd)
+TB_MISC_VDBS=$(call build_vdb_list, src/misc/types.vhd )
 
 TB_CM_PWR_VDBS=$(TB_MISC_VDBS) $(call build_vdb_list, src/CM_interface/CM_pwr.vhd)    
 tb_CM_pwr : $(TB_CM_PWR_VDBS)  
 	$(TB_RULE)     
+
+TB_IPMC_I2C_SLAVE_VDBS=$(TB_MISC_VDBS) $(call build_vdb_list, src/axiReg/axiRegPkg.vhd src/axiReg/axiReg.vhd src/IPMC_i2c_slave/i2c_slave.vhd src/misc/asym_dualport_ram.vhd src/IPMC_i2c_slave/IPMC_i2c_slave.vhd)    
+tb_IPMC_i2c_slave : $(TB_IPMC_I2C_SLAVE_VDBS)  
+	$(TB_RULE)     
+
 #################################################################################
 # Help 
 #################################################################################

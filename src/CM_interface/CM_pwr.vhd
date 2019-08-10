@@ -93,8 +93,13 @@ begin  -- architecture behavioral
           end if;
 
           --moving down
-          if start_PWR = '0' or start_uC = '0' then
+          if start_PWR = '0' then 
             state <= SM_PWR_DOWN;
+          end if;
+
+          --moving to the end
+          if start_uC = '0' then
+            state <= SM_RESET;
           end if;
         --------------------------------
         when SM_RUNNING =>
@@ -113,6 +118,10 @@ begin  -- architecture behavioral
             end if;
           else
             state <= SM_PWR_DOWN;
+          end if;
+
+          if start_uC = '0' then
+            state <= SM_RESET;
           end if;
         when others => state <= SM_RESET;
       end case;

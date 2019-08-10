@@ -244,9 +244,11 @@ begin  -- Behavioral
     if internal_reset = '1' then                 -- asynchronous internal_reset (active high)
       state <= STATE_IDLE;
     elsif clk'event and clk = '1' then  -- rising clock edge
-      if SCL_old = '1' and SCL = '0' then
+      if stop = '1' then
+        state <= STATE_IDLE;
+      elsif SCL_old = '1' and SCL = '0' then
         if start = '1' then
-          state <= STATE_DEV_ADDR;
+          state <= STATE_DEV_ADDR;       
         elsif ack_bit = '1' then
           case state is
             -------------------------------------------------------------------
@@ -257,7 +259,7 @@ begin  -- Behavioral
               if address_detect = '0' then
                 -- not our address, go back to idle
                 state <= STATE_IDLE;
-              elsif input_byte(1) = '0' then
+              elsif input_byte(0) = '0' then
                 -- master is going to write to us, so this is a new register address
                 state <= STATE_REG_ADDR_SET;                
               else
@@ -266,19 +268,20 @@ begin  -- Behavioral
               end if;
             ------------------------------------------------------------------
             when STATE_MASTER_READ =>
-              if input_byte(0) = '0' then
-                -- master wants to read another byte
-                state <= STATE_MASTER_READ;
-              else
-                -- master is done reading
-                state <= STATE_IDLE;
-              end if;
+              state <= STATE_MASTER_READ;
+--              if input_byte(0) = '0' then
+--                -- master wants to read another byte
+--                state <= STATE_MASTER_READ;
+--              else
+--                -- master is done reading
+--                state <= STATE_IDLE;
+--              end if;
             ------------------------------------------------------------------
             when STATE_REG_ADDR_SET =>
               state <= STATE_MASTER_WRITE;
             ------------------------------------------------------------------             
             when STATE_MASTER_WRITE =>
-              state <= STATE_MASTER_WRITE;
+                state <= STATE_MASTER_WRITE;
             when others => state <= STATE_IDLE;
           end case;
         end if;
