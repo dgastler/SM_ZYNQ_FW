@@ -200,26 +200,35 @@ int main(int argc, char **argv) {
    int s;
    int c; 
    int fd_uio;
-   
+   int uioNumber = -1;
+
    struct sockaddr_in address;
    
 
 
    opterr = 0;
 
-   while ((c = getopt(argc, argv, "v")) != -1)
-      switch (c) {
-      case 'v':
-         verbose = 1;
-         break;
-      case '?':
-         fprintf(stderr, "usage: %s [-v]\n", *argv);
-         return 1;
-      }
+   while ((c = getopt(argc, argv, "v?n:")) != -1){
+     switch (c) {
+     case 'v':
+       verbose = 1;
+       break;
+     case '?':
+       fprintf(stderr, "usage: %s [-v]\n", *argv);
+       return 1;
+     case 'n':
+       uioNumber=atoi(optarg);
+       break;
+     default:
+       break;
+     }
+   }
 
-   fd_uio = open("/dev/uio1", O_RDWR );
+   char uioDevice[] = "/dev/uioXX";
+   snprintf(uioDevice,sizeof(uioDevice),"/dev/uio%d",uioNumber);
+   fd_uio = open(uioDevice, O_RDWR );
    if (fd_uio < 1) {
-      fprintf(stderr,"Failed to Open UIO Device\n");
+     fprintf(stderr,"Failed to Open UIO Device %s\n",uioDevice);
       return -1;
    }
 
@@ -241,7 +250,7 @@ int main(int argc, char **argv) {
    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &i, sizeof i);
 
    address.sin_addr.s_addr = INADDR_ANY;
-   address.sin_port = htons(2542);
+   address.sin_port = htons(2542+uioNumber);
    address.sin_family = AF_INET;
 
    if (bind(s, (struct sockaddr*) &address, sizeof(address)) < 0) {

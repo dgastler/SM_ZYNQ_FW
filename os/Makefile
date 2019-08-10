@@ -158,6 +158,8 @@ $(FSBL):
 $(BUILD_ROOTFS): $(ZYNQ_OS_PROJECT) $(USER_MOD_ROOTFS)
 	@echo "Copy user root fs config to build root fs config"
 	@cp $(USER_MOD_ROOTFS)  $(BUILD_ROOTFS) 
+	@cp $(USER_MOD_ROOTFS)  $(BUILD_ROOTFS).test
+#	@chmod a-w $(BUILD_ROOTFS)
 	@echo "Copy user mods to mounting"
 	make $(FSTAB)
 	make $(DROPBEAR)
@@ -188,15 +190,15 @@ $(BOOT_FILES): $(PACKAGE_LINUX_IMAGE)
 	source $(VIVADO_PETALINUX) && \
 	petalinux-package --boot --format BIN --fsbl images/linux/zynq_fsbl.elf --fpga ../../bit/top.bit  --uboot --force $(OUTPUT_MARKUP)
 
-REBUILD_FSBL:
-	rm -rf $(ZYNQ_OS_PROJECT_PATH)/components/plnx_workspace/fsbl
-	rm -f $(FSBL)
-	make $(FSBL)
-	@cd $(ZYNQ_OS_PROJECT_PATH) &&\
-	source $(VIVADO_PETALINUX) && \
-	petalinux-build -c bootloader -x distclean $(OUTPUT_MARKUP) && \
-	petalinux-build -c bootloader $(OUTPUT_MARKUP) && \
-	petalinux-package --boot --format BIN --fsbl images/linux/zynq_fsbl.elf --fpga ../../bit/top.bit  --uboot --force $(OUTPUT_MARKUP)
+#REBUILD_FSBL:
+#	rm -rf $(ZYNQ_OS_PROJECT_PATH)/components/plnx_workspace/fsbl
+#	rm -f $(FSBL)
+#	make $(FSBL)
+#	@cd $(ZYNQ_OS_PROJECT_PATH) &&\
+#	source $(VIVADO_PETALINUX) && \
+#	petalinux-build -c bootloader -x distclean $(OUTPUT_MARKUP) && \
+#	petalinux-build -c bootloader $(OUTPUT_MARKUP) && \
+#	petalinux-package --boot --format BIN --fsbl images/linux/zynq_fsbl.elf --fpga ../../bit/top.bit  --uboot --force $(OUTPUT_MARKUP)
 
 
 clean:

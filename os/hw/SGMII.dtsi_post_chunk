@@ -1,5 +1,5 @@
 &gem1 {
-phy-mode = "sgmii";
+phy-mode = "gmii";
 local-mac-address = [00 0a 35 00 00 01];
 phy-handle = <&phy9>;
 
