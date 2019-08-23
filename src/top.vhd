@@ -112,10 +112,10 @@ entity top is
     -------------------------------------------------------------------------------------------
     -- MGBT 1
     -------------------------------------------------------------------------------------------
-    AXI_C2C_Rx_P      : in    std_logic_vector(0 to 0); --1);
-    AXI_C2C_Rx_N      : in    std_logic_vector(0 to 0); --1);
-    AXI_C2C_Tx_P      : out   std_logic_vector(0 to 0); --1);
-    AXI_C2C_Tx_N      : out   std_logic_vector(0 to 0); --1);
+    AXI_C2C_Rx_P      : in    std_logic_vector(0 to 3); --1);
+    AXI_C2C_Rx_N      : in    std_logic_vector(0 to 3); --1);
+    AXI_C2C_Tx_P      : out   std_logic_vector(0 to 3); --1);
+    AXI_C2C_Tx_N      : out   std_logic_vector(0 to 3); --1);
 
     refclk_C2C_P      : in    std_logic_vector(0 downto 0);
     refclk_C2C_N      : in    std_logic_vector(0 downto 0);
@@ -505,29 +505,29 @@ begin  -- architecture structure
       tap_tck_1                 => XVC1_tck,
       tap_tdi_1                 => XVC1_tdi,
       tap_tdo_1                 => XVC1_tdo,
-      tap_tms_1                 => XVC1_tms,
+      tap_tms_1                 => XVC1_tms
 
-      init_clk        =>  AXI_C2C_aurora_init_clk,
-      C2C1_phy_Rx_rxn =>  AXI_C2C_Rx_N(0 to 0),
-      C2C1_phy_Rx_rxp =>  AXI_C2C_Rx_P(0 to 0),
-      C2C1_phy_Tx_txn =>  AXI_C2C_Tx_N(0 to 0),
-      C2C1_phy_Tx_txp =>  AXI_C2C_Tx_P(0 to 0),
-      C2C1_phy_refclk_clk_n => refclk_C2C_N(0),
-      C2C1_phy_refclk_clk_p => refclk_C2C_P(0),
-      C2C1_phy_power_down   => AXI_C2C_powerdown(0),
-      C2C1_aurora_do_cc                 => CM1_C2C_Mon.aurora_do_cc                ,
-      C2C1_aurora_pma_init_in           => CM1_C2C_Ctrl.aurora_pma_init_in,
-      C2C1_axi_c2c_config_error_out     => CM1_C2C_Mon.axi_c2c_config_error_out    ,
-      C2C1_axi_c2c_link_error_out       => CM1_C2C_Mon.axi_c2c_link_error_out      ,
-      C2C1_axi_c2c_link_status_out      => CM1_C2C_Mon.axi_c2c_link_status_out     ,
-      C2C1_axi_c2c_multi_bit_error_out  => CM1_C2C_Mon.axi_c2c_multi_bit_error_out ,
-      C2C1_phy_gt_pll_lock              => CM1_C2C_Mon.phy_gt_pll_lock             ,
-      C2C1_phy_hard_err                 => CM1_C2C_Mon.phy_hard_err                ,
-      C2C1_phy_lane_up                  => CM1_C2C_Mon.phy_lane_up                 ,
-      C2C1_phy_link_reset_out           => CM1_C2C_Mon.phy_link_reset_out          ,
-      C2C1_phy_gt_refclk1_out           => C2C1_phy_gt_refclk1_out          ,
-      C2C1_phy_mmcm_not_locked_out      => CM1_C2C_Mon.phy_mmcm_not_locked_out     ,
-      C2C1_phy_soft_err                 => CM1_C2C_Mon.phy_soft_err                
+--      init_clk        =>  AXI_C2C_aurora_init_clk,
+--      C2C1_phy_Rx_rxn =>  AXI_C2C_Rx_N(0 to 0),
+--      C2C1_phy_Rx_rxp =>  AXI_C2C_Rx_P(0 to 0),
+--      C2C1_phy_Tx_txn =>  AXI_C2C_Tx_N(0 to 0),
+--      C2C1_phy_Tx_txp =>  AXI_C2C_Tx_P(0 to 0),
+--      C2C1_phy_refclk_clk_n => refclk_C2C_N(0),
+--      C2C1_phy_refclk_clk_p => refclk_C2C_P(0),
+--      C2C1_phy_power_down   => AXI_C2C_powerdown(0),
+--      C2C1_aurora_do_cc                 => CM1_C2C_Mon.aurora_do_cc                ,
+--      C2C1_aurora_pma_init_in           => CM1_C2C_Ctrl.aurora_pma_init_in,
+--      C2C1_axi_c2c_config_error_out     => CM1_C2C_Mon.axi_c2c_config_error_out    ,
+--      C2C1_axi_c2c_link_error_out       => CM1_C2C_Mon.axi_c2c_link_error_out      ,
+--      C2C1_axi_c2c_link_status_out      => CM1_C2C_Mon.axi_c2c_link_status_out     ,
+--      C2C1_axi_c2c_multi_bit_error_out  => CM1_C2C_Mon.axi_c2c_multi_bit_error_out ,
+--      C2C1_phy_gt_pll_lock              => CM1_C2C_Mon.phy_gt_pll_lock             ,
+--      C2C1_phy_hard_err                 => CM1_C2C_Mon.phy_hard_err                ,
+--      C2C1_phy_lane_up                  => CM1_C2C_Mon.phy_lane_up                 ,
+--      C2C1_phy_link_reset_out           => CM1_C2C_Mon.phy_link_reset_out          ,
+--      C2C1_phy_gt_refclk1_out           => C2C1_phy_gt_refclk1_out          ,
+--      C2C1_phy_mmcm_not_locked_out      => CM1_C2C_Mon.phy_mmcm_not_locked_out     ,
+--      C2C1_phy_soft_err                 => CM1_C2C_Mon.phy_soft_err                
       );
 
 
@@ -851,17 +851,23 @@ begin  -- architecture structure
       SDA           => FP_LED_SDA,
       shutdownout   => open);
 
-  
 
---  c2c_ibert_1: entity work.c2c_ibert
---    port map (
---      TXN_O(0 to 1)       => AXI_C2C_Tx_N(0 to 1),
---      TXP_O(0 to 1)       => AXI_C2C_Tx_P(0 to 1),
---      RXOUTCLK_O  => open,
---      RXN_I       => AXI_C2C_Rx_N(0 to 1),
---      RXP_I       => AXI_C2C_Rx_P(0 to 1),
---      GTREFCLK0_I => open,
---      GTREFCLK1_I(0) => C2C1_phy_gt_refclk1_out,
---      SYSCLK_I    => C2C1_phy_gt_refclk1_out);
+
+  ibert_clk : IBUFDS_GTE2
+    port map (
+      O     => refclk_C2C,
+      ODIV2 => open,
+      CEB   => '1',
+      I     => refclk_C2C_P(0),
+      IB    => refclk_C2C_N(0));
+  
+  ibert_1: entity work.ibert
+    port map (
+      TXN_O => AXI_C2C_Tx_N,
+      TXP_O => AXI_C2C_Tx_P,
+      RXN_I => AXI_C2C_Rx_N,
+      RXP_I => AXI_C2C_Rx_P,
+      GTREFCLK0_I => refclk_C2C);
+  
   
 end architecture structure;

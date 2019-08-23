@@ -37,6 +37,7 @@ set xdc_files src/top.xdc
 set xci_files "\
     	      cores/SGMII_INTF/SGMII_INTF.xci \
     	      cores/onboard_CLK/onboard_CLK.xci \
+	      cores/ibert/ibert.xci \
     	      "
 #	      cores/ila_i2c_debug/ila_i2c_debug.xci \
 #	      cores/c2c_ibert/c2c_ibert.xci \
